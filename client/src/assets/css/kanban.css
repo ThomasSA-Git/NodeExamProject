@@ -1,0 +1,22 @@
+body {
+    margin: 0;
+  }
+  
+  .task-column,
+  .progress-task-column,
+  .complete-task-column {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    min-height: 85px;
+  }
+  .draggable {
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid black;
+    cursor: move;
+  }
+  
+  .draggable.dragging {
+    opacity: .5;
+  }

@@ -7,9 +7,11 @@
   import Member from "./pages/MemberPage/MemberPage.svelte";
   import Admin from "./pages/Admin/Admin.svelte";
   import PrivateRoute from "./components/RouteProtection/PrivateRoute.svelte";
+  import ResetPassword from "./pages/ResetPassword/ResetPassword.svelte";
+  import Kanban from "./pages/Kanban/Kanban.svelte";
   import { user, role } from "./store/stores.js";
   import { url } from "./util/apiUrl";
-  import ResetPassword from "./pages/ResetPassword/ResetPassword.svelte";
+  import Diagram from "./pages/Diagram/Diagram.svelte";
 
   import { onMount } from "svelte";
 
@@ -23,18 +25,12 @@
     }
   });
 
-  let showDropdown = false;
-
   async function handleLogout() {
     await fetch(url + "auth/logout", {
       credentials: "include",
     });
     $user = null;
     localStorage.clear();
-  }
-
-  function toggleDropdown() {
-    showDropdown = !showDropdown;
   }
 </script>
 
@@ -51,6 +47,10 @@
 
     <Link to="/memberpage">Member</Link>
 
+    <Link to="/kanban">Kanban</Link>
+
+    <Link to="/diagram">Diagram</Link>
+
     {#if $user != null && $role == "admin"}
       <Link to="/adminpage">Admin</Link>
     {/if}
@@ -66,6 +66,8 @@
     <Route path="/signup"><Signup /></Route>
     <Route path="/resetpassword"><ResetPassword /></Route>
     <Route path="/contact"><Contact /></Route>
+    <Route path="/kanban"><Kanban /></Route>
+    <Route path="/diagram"><Diagram /></Route>
     <PrivateRoute path="/memberpage" let:location>
       <Member />
     </PrivateRoute>
