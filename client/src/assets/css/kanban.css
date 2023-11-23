@@ -1,22 +1,72 @@
-body {
-    margin: 0;
-  }
-  
-  .task-column,
-  .progress-task-column,
-  .complete-task-column {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px;
-    min-height: 85px;
-  }
-  .draggable {
-    padding: 1rem;
-    background-color: white;
-    border: 1px solid black;
-    cursor: move;
-  }
-  
-  .draggable.dragging {
-    opacity: .5;
-  }
+.hovering {
+  border-color: rgb(0, 255, 34);
+}
+.task {
+  display: block; /* Display tasks vertically */
+}
+li {
+  background-color: lightgray;
+  cursor: pointer;
+  margin-bottom: 10px; /* Add margin between tasks */
+  padding: 10px;
+  border-radius: 5px; /* Rounded corners for tasks */
+}
+li:hover {
+  background: lightgray;
+  color: white;
+}
+ul {
+  height: 40px; /* needed when empty */
+}
+.kan-col {
+  flex: 1;
+  border: 3px solid lightgray;
+  border-radius: 5px;
+  padding: 10px;
+  min-height: 500px;
+}
+
+.list-name {
+  flex: 9; /* Take up 90% of the space */
+}
+/* Style for editable list name */
+[contenteditable="true"] {
+  border: 1px solid lightgray;
+  padding: 5px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  flex: 9;
+}
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.btn-container-btn {
+  margin-left: 10px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+}
+
+.task-content {
+  flex: 9; /* Take up 90% of the space */
+}
+
+.delete-button {
+  flex: 1; /* Take up 10% of the space */
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.delete-image {
+  width: 20px;
+  height: 20px;
+}

@@ -1,19 +1,28 @@
 <script>
+  // @ts-nocheck
+
   import { flip } from "svelte/animate";
+  import "../../assets/css/kanban.css";
   import TaskModal from "../../assets/modal/TaskModal.svelte";
 
   let lists = [
     {
       name: "To do",
-      tasks: [/* "Create github repo", "Do homework" */],
+      tasks: [
+        {
+          name: "test",
+          description: "test",
+          url: ""
+        },
+      ],
     },
     {
       name: "In progress",
-      tasks: [/* "Sleep", "Eat" */],
+      tasks: [],
     },
     {
       name: "Completed",
-      tasks: [/* "Do dishes" */],
+      tasks: [],
     },
     {
       name: "Discarded",
@@ -64,35 +73,54 @@
   // Modal logic
   let isModalOpen = false;
 
-function openModal() {
-  isModalOpen = true;
-}
+  function openModal() {
+    isModalOpen = true;
+  }
 
-function closeModal() {
-  isModalOpen = false;
-}
+  function closeModal() {
+    isModalOpen = false;
+  }
 
+  function deleteTask(listIndex, taskIndex) {
+    lists[listIndex].tasks.splice(taskIndex, 1);
+    // Update tasks on lists array to trigger reactivity
+    lists = [...lists];
+  }
 
+  function deleteList(listIndex) {
+    lists.splice(listIndex, 1);
+    // Update lists array to trigger reactivity
+    lists = [...lists];
+  }
 </script>
 
 <p>Kanban board</p>
 
-<button on:click={handleAddList}>Add list</button>
-<button on:click={openModal}>Add Task</button>
-
+<div class="btn-container">
+  <button class="btn-container-btn" on:click={handleAddList}>Add list</button>
+  <button class="btn-container-btn" on:click={openModal}>Add Task</button>
+</div>
 {#if isModalOpen}
-<TaskModal on:closeModal={closeModal} addTask={addTask} />
+  <TaskModal on:closeModal={closeModal} {addTask} />
 {/if}
 
 <div style="display: flex; gap: 20px;">
   {#each lists as list, listIndex (list)}
     <div animate:flip class="kan-col">
       <div
+        class="list-name"
         contenteditable="true"
         on:input={(e) => handleEditListName(listIndex, e.target)}
       >
         {list.name}
       </div>
+      <button class="delete-button" on:click={() => deleteList(listIndex)}>
+        <img
+          src="../../public/delete-icon.jpg"
+          alt="Delete List"
+          class="delete-image"
+        />
+      </button>
       <hr />
       <ul
         class:hovering={hoveringOverList === list.name}
@@ -105,51 +133,25 @@ function closeModal() {
         {#each list.tasks as task, taskIndex (task)}
           <div class="task" animate:flip>
             <li
+              class="task-content"
               draggable={true}
               on:dragstart={(event) => dragStart(event, listIndex, taskIndex)}
             >
               {task.name}
             </li>
+            <button
+              class="delete-button"
+              on:click={() => deleteTask(listIndex, taskIndex)}
+            >
+              <img
+                src="../../public/delete-icon.jpg"
+                alt="Delete Task"
+                class="delete-image"
+              />
+            </button>
           </div>
         {/each}
       </ul>
     </div>
   {/each}
 </div>
-
-<style>
-  .hovering {
-    border-color: rgb(0, 255, 34);
-  }
-  .task {
-    display: block; /* Display tasks vertically */
-  }
-  li {
-    background-color: lightgray;
-    cursor: pointer;
-    margin-bottom: 10px; /* Add margin between tasks */
-    padding: 10px;
-    border-radius: 5px; /* Rounded corners for tasks */
-  }
-  li:hover {
-    background: green;
-    color: white;
-  }
-  ul {
-    height: 40px; /* needed when empty */
-  }
-  .kan-col {
-    flex: 1;
-    border: 1px solid lightgray;
-    border-radius: 5px;
-    padding: 10px;
-    min-height: 500px;
-  }
-  /* Style for editable list name */
-  [contenteditable="true"] {
-    border: 1px solid lightgray;
-    padding: 5px;
-    border-radius: 3px;
-    margin-bottom: 10px;
-  }
-</style>
