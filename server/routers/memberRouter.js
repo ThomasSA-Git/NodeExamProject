@@ -4,8 +4,7 @@ const router = Router();
 
 import {
   findUserByUsername,
-  updateUserAddress,
-} from "../db/mongoDb.js";
+} from "../db/usersDb.js";
 
 
 import { createUserResponse } from "../dto/userResponse.js";
@@ -40,26 +39,5 @@ router.get("/api/member/getMember/", isAuthenticated, async (req, res) => {
   }
 });
 
-router.post("/api/member/updateAddress", isAuthenticated, async (req, res) => {
-  try {
-    const { username, address } = req.body;
-
-    const purifiedAddress = {
-      streetname: purify(address.streetname),
-      cityname: purify(address.cityname),
-      zipcode: purify(address.zipcode),
-    };
-    // updates address of users in db
-    const success = await updateUserAddress(username, purifiedAddress);
-    if (success) {
-      res.status(200).json({ message: "Address succesfully updated." });
-    } else {
-      console.log("error in db");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal server error." });
-  }
-});
 
 export default router;

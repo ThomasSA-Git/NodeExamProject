@@ -13,7 +13,7 @@
   function handleSubmit() {
     // Validate input fields
     if (!taskName || !startDate || !endDate) {
-      alert("Please fill in all required fields.");
+      
       return;
     }
 

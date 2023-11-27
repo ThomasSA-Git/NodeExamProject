@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import { Router } from "express";
+import e, { Router } from "express";
 
 const router = Router();
 
@@ -12,11 +12,14 @@ import { hashPassword, comparePasswords } from "../util/bcrypt.js";
 import {
   createUser,
   findUserByUsername,
+  updateUserPassword,
+} from "../db/usersDb.js";
+
+import {
+  deleteUserTokenByUsername,
   findUserInResetPassword,
   addToResetPassword,
-  updateUserPassword,
-  deleteUserTokenByUsername,
-} from "../db/mongoDb.js";
+} from "../db/tokenDb.js";
 
 import { generateToken } from "../util/tokenGenerator.js";
 
@@ -61,10 +64,10 @@ router.post("/api/auth/login", async (req, res) => {
 
 router.post("/api/auth/register", async (req, res) => {
   const { username, email, password } = req.body;
-
+  console.log(email)
   // purify relevant input
   const purifiedUsername = purify(username);
-  const purifiedEmail = purify(username);
+  const purifiedEmail = purify(email);
   // Hash the password
   const hashedPassword = await hashPassword(password);
 
@@ -110,7 +113,7 @@ router.post("/api/auth/getSecretToken", async (req, res) => {
     if (userExists) {
       const token = generateToken();
       await addToResetPassword(username, token);
-
+      console.log(userExists)
       const message = passwordResetMessage(username, token);
       sendFakeEmail(userExists.email, passwordResetSubject, message);
 

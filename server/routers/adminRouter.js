@@ -2,7 +2,8 @@ import { Router } from "express";
 const router = Router();
 
 // Mongo db imports
-import { findAllUsers } from "../db/mongoDb.js";
+//import { findAllUsers } from "../db/mongoDb.js";
+import { findAllUsers } from "../db/usersDb.js";
 
 import { mapResponse } from "../dto/userResponse.js";
 

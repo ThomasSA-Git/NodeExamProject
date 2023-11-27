@@ -4,6 +4,7 @@
   import { flip } from "svelte/animate";
   import "../../assets/css/kanban.css";
   import TaskModal from "../../assets/modal/TaskModal.svelte";
+  import UpdateTaskModal from "../../assets/modal/UpdateTaskModal.svelte";
 
   let lists = [
     {
@@ -81,6 +82,26 @@
     isModalOpen = false;
   }
 
+  let isUpdateModalOpen = false;
+  let taskToUpdate;
+  let updateTaskIndex;
+
+  function openUpdateModal(listIndex, taskIndex, task) {
+    taskToUpdate = task;
+    updateTaskIndex = taskIndex;
+    isUpdateModalOpen = true;
+  }
+
+  function closeUpdateModal() {
+    isUpdateModalOpen = false;
+  }
+
+  function updateTask(updatedTask) {
+    lists[0].tasks[updateTaskIndex] = updatedTask;
+    lists = [...lists]; // Trigger reactivity
+    closeUpdateModal();
+  }
+
   function deleteTask(listIndex, taskIndex) {
     lists[listIndex].tasks.splice(taskIndex, 1);
     // Update tasks on lists array to trigger reactivity
@@ -96,13 +117,24 @@
 
 <p>Kanban board</p>
 
+<!-- Button for adding lists and tasks -->
 <div class="btn-container">
   <button class="btn-container-btn" on:click={handleAddList}>Add list</button>
   <button class="btn-container-btn" on:click={openModal}>Add Task</button>
 </div>
+
 {#if isModalOpen}
   <TaskModal on:closeModal={closeModal} {addTask} />
 {/if}
+
+{#if isUpdateModalOpen}
+  <UpdateTaskModal
+    on:closeModal={closeUpdateModal}
+    {updateTask}
+    {taskToUpdate}
+  />
+{/if}
+
 
 <div style="display: flex; gap: 20px;">
   {#each lists as list, listIndex (list)}
@@ -112,7 +144,7 @@
         contenteditable="true"
         on:input={(e) => handleEditListName(listIndex, e.target)}
       >
-        {list.name}
+        <strong>{list.name}</strong>
       </div>
       <button class="delete-button" on:click={() => deleteList(listIndex)}>
         <img
@@ -137,18 +169,29 @@
               draggable={true}
               on:dragstart={(event) => dragStart(event, listIndex, taskIndex)}
             >
-              {task.name}
-            </li>
-            <button
+              <strong>{task.name}</strong>
+              <button
               class="delete-button"
-              on:click={() => deleteTask(listIndex, taskIndex)}
+              on:click={() => openUpdateModal(listIndex, taskIndex, task)}
             >
               <img
-                src="../../public/delete-icon.jpg"
-                alt="Delete Task"
+                src="../../public/edit-icon.png"
+                alt="Edit Task"
                 class="delete-image"
               />
             </button>
+              <button
+                class="delete-button"
+                on:click={() => deleteTask(listIndex, taskIndex)}
+              >
+                <img
+                  src="../../public/delete-icon.jpg"
+                  alt="Delete Task"
+                  class="delete-image"
+                />
+              </button>
+            </li>
+   
           </div>
         {/each}
       </ul>

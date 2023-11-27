@@ -18,7 +18,7 @@ export async function sendFakeEmail(userEmail, subject, message) {
   
     // Setup email data
     const mailOptions = {
-      from: 'my_service_mail_for_mandatoryII@gmail.com',
+      from: 'my_service_mail_for_exam@gmail.com',
       to: userEmail,
       subject: subject,
       text: message

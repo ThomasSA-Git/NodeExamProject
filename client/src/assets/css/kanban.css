@@ -1,11 +1,8 @@
 .hovering {
   border-color: rgb(0, 255, 34);
 }
-.task {
-  display: block; /* Display tasks vertically */
-}
 li {
-  background-color: lightgray;
+  background-color: white;
   cursor: pointer;
   margin-bottom: 10px; /* Add margin between tasks */
   padding: 10px;
@@ -20,10 +17,11 @@ ul {
 }
 .kan-col {
   flex: 1;
-  border: 3px solid lightgray;
+  border: 3px solid darkgray;
   border-radius: 5px;
   padding: 10px;
   min-height: 500px;
+  background-color: lightgreen;
 }
 
 .list-name {
@@ -31,7 +29,7 @@ ul {
 }
 /* Style for editable list name */
 [contenteditable="true"] {
-  border: 1px solid lightgray;
+  border: 1px solid darkgray;
   padding: 5px;
   border-radius: 3px;
   margin-bottom: 10px;
@@ -50,6 +48,7 @@ ul {
 .task {
   display: flex;
   align-items: center;
+  /*   display: block; /* Display tasks vertically */
 }
 
 .task-content {

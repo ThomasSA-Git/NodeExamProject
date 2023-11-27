@@ -65,11 +65,12 @@ app.use(adminRouter);
 // Used for creating an admin user on start up. Only for making it easier.
 // If deployed it wouldnt be added here, and password would be set beforehand
 // in .env.
-import { createAdminUser, findUserByUsername } from "./db/mongoDb.js";
+import { createAdminUser, findUserByUsername } from "./db/usersDb.js";
 import { hashPassword } from "./util/bcrypt.js";
 if (!findUserByUsername("admin")) {
   const adminPassword = hashPassword("admin")
   await createAdminUser(adminPassword);
+  console.log("admin created")
 }
 
 const PORT = process.env.PORT || 8080;
