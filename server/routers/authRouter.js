@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import e, { Router } from "express";
+import { Router } from "express";
 
 const router = Router();
 

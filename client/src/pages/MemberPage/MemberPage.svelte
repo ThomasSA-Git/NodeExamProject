@@ -1,95 +1,97 @@
 <script>
   import { onMount } from "svelte";
-  import { user, BASE_URL } from "../../store/stores.js";
+  import { user } from "../../store/stores.js";
+  import { BASE_URL } from "../../store/global.js";
+  import { currentProject } from "../../store/project";
   import "../../assets/css/toast.css";
   import { showToast } from "../../assets/js/toast.js";
+  import { navigate } from "svelte-navigator";
 
-  const member = $user;
+  let projectData = [];
 
-  let streetname = "";
-  let cityname = "";
-  let zipcode = "";
+  let newProjectName;
 
   onMount(async () => {
     try {
-      const response = await fetch($BASE_URL + "/member/getMember", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        $BASE_URL + `/projects/byUserName/${$user}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
-        const memberData = await response.json();
-        streetname = memberData.user.address?.streetname || "";
-        cityname = memberData.user.address?.cityname || "";
-        zipcode = memberData.user.address?.zipcode || "";
+        const responseData = await response.json();
+        projectData = responseData.data;
+        console.log(projectData)
       } else {
         const errorData = await response.json();
-        const errorMessage = errorData.error || "Failed to fetch member data.";
-
+        const errorMessage = errorData.error || "Failed to fetch project data.";
         showToast(errorMessage, "error");
-
-        streetname = "";
-        cityname = "";
-        zipcode = "";
       }
     } catch (error) {
-      // Handle other errors
-
       showToast("An error occurred.", "error");
-
-      streetname = "";
-      cityname = "";
-      zipcode = "";
     }
   });
 
-  async function handleUpdateAddress() {
+  async function handleCreateProject() {
     try {
-      const updateData = {
-        username: member,
-        address: {
-          streetname,
-          cityname,
-          zipcode,
-        },
+      const newProjectData = {
+        projectName: newProjectName,
+        username: $user,
       };
 
-      const response = await fetch($BASE_URL + "/member/updateAddress", {
+      const response = await fetch($BASE_URL + `/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updateData),
+        body: JSON.stringify(newProjectData),
         credentials: "include",
       });
 
       if (response.ok) {
-        const successMessage = await response.json();
-
-        showToast(successMessage.message, "succes");
+        const result = await response.json();
+        $currentProject = newProjectName; // or use result.projectName if it's returned
+        navigate("/project");
       } else {
         const errorData = await response.json();
-        const errorMessage = errorData.error || "Failed to update address.";
-
+        const errorMessage = errorData.error || "Failed to create project.";
         showToast(errorMessage, "error");
       }
     } catch (error) {
       showToast("An error occurred.", "error");
     }
   }
+
+  function handleNavigate(projectName) {
+    $currentProject = projectName;
+    navigate("/project");
+  }
 </script>
 
-<h1>Hello {member}</h1>
-<p>Here you can see your personal info and update your address.</p>
+<h1>Hello {$user}</h1>
+<p>
+  Here you can see a list of projects you're involved in or create a new
+  project.
+</p>
 
-<form on:submit|preventDefault={handleUpdateAddress}>
-  <label for="streetname">Street:</label>
-  <input type="text" id="streetname" bind:value={streetname} />
+<label for="newProjectName">New project name</label>
+<input type="text" bind:value={newProjectName} required />
+<button on:click={handleCreateProject}>Submit</button>
 
-  <label for="cityname">City:</label>
-  <input type="text" id="cityname" bind:value={cityname} />
-
-  <label for="zipcode">Zip code:</label>
-  <input type="text" id="zipcode" bind:value={zipcode} />
-
-  <button type="submit">Submit new address</button>
-</form>
+{#if projectData.length > 0}
+{#each projectData as project}
+  <div class="column">
+    <button on:click={() => handleNavigate(project.projectName)}><h2>{project.projectName}</h2></button>
+    <p>Users assigned to project:</p>
+    <ul>
+      {#each project.users as user}
+        <li>{user}</li>
+      {/each}
+    </ul>
+  </div>
+{/each}
+{:else}
+  <p>No projects found.</p>
+{/if}

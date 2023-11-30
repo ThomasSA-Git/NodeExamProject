@@ -9,6 +9,7 @@
   import PrivateRoute from "./components/RouteProtection/PrivateRoute.svelte";
   import ResetPassword from "./pages/ResetPassword/ResetPassword.svelte";
   import Kanban from "./pages/Kanban/Kanban.svelte";
+  import Project from "./pages/Project/Project.svelte";
   import { user, role } from "./store/stores.js";
   import { url } from "./util/apiUrl";
   import Diagram from "./pages/Diagram/Diagram.svelte";
@@ -68,6 +69,7 @@
     <Route path="/contact"><Contact /></Route>
     <Route path="/kanban"><Kanban /></Route>
     <Route path="/diagram"><Diagram /></Route>
+    <PrivateRoute path="/project"><Project /></PrivateRoute>
     <PrivateRoute path="/memberpage" let:location>
       <Member />
     </PrivateRoute>

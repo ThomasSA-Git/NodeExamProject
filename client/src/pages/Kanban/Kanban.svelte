@@ -13,7 +13,7 @@
         {
           name: "test",
           description: "test",
-          url: ""
+          url: "",
         },
       ],
     },
@@ -32,6 +32,8 @@
   ];
 
   let hoveringOverList;
+
+  let listIndexToUpdate;
 
   function dragStart(event, listIndex, taskIndex) {
     const data = { listIndex, taskIndex };
@@ -89,6 +91,7 @@
   function openUpdateModal(listIndex, taskIndex, task) {
     taskToUpdate = task;
     updateTaskIndex = taskIndex;
+    listIndexToUpdate = listIndex; // Add this line to capture listIndex
     isUpdateModalOpen = true;
   }
 
@@ -97,8 +100,11 @@
   }
 
   function updateTask(updatedTask) {
-    lists[0].tasks[updateTaskIndex] = updatedTask;
-    lists = [...lists]; // Trigger reactivity
+    // Update the task in the correct list and at the correct index
+    lists[listIndexToUpdate].tasks[updateTaskIndex] = updatedTask;
+
+    // Trigger reactivity
+    lists = [...lists];
     closeUpdateModal();
   }
 
@@ -135,7 +141,6 @@
   />
 {/if}
 
-
 <div style="display: flex; gap: 20px;">
   {#each lists as list, listIndex (list)}
     <div animate:flip class="kan-col">
@@ -170,16 +175,18 @@
               on:dragstart={(event) => dragStart(event, listIndex, taskIndex)}
             >
               <strong>{task.name}</strong>
+              <!-- Edit button for task -->
               <button
-              class="delete-button"
-              on:click={() => openUpdateModal(listIndex, taskIndex, task)}
-            >
-              <img
-                src="../../public/edit-icon.png"
-                alt="Edit Task"
-                class="delete-image"
-              />
-            </button>
+                class="edit-button"
+                on:click={() => openUpdateModal(listIndex, taskIndex, task)}
+              >
+                <img
+                  src="../../public/edit-icon.png"
+                  alt="Edit Task"
+                  class="edit-image"
+                />
+              </button>
+              <!-- Delete button for task -->
               <button
                 class="delete-button"
                 on:click={() => deleteTask(listIndex, taskIndex)}
@@ -191,7 +198,6 @@
                 />
               </button>
             </li>
-   
           </div>
         {/each}
       </ul>

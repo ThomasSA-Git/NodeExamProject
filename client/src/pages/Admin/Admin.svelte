@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { BASE_URL } from "../../store/stores.js";
+  import { BASE_URL } from "../../store/global.js";
   import "../../assets/css/toast.css";
   import { showToast } from "../../assets/js/toast.js";
 

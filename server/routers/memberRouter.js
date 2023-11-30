@@ -20,7 +20,7 @@ function isAuthenticated(req, res, next) {
 }
 
 // maybe use session instead of path variable..?
-router.get("/api/member/getMember/", isAuthenticated, async (req, res) => {
+router.get("/api/members", isAuthenticated, async (req, res) => {
   try {
     // finduser in db
     const username = req.session.user.username;

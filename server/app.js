@@ -62,6 +62,9 @@ app.use(memberRouter);
 import adminRouter from "./routers/adminRouter.js";
 app.use(adminRouter);
 
+import projectRouter from "./routers/projectRouter.js";
+app.use(projectRouter);
+
 // Used for creating an admin user on start up. Only for making it easier.
 // If deployed it wouldnt be added here, and password would be set beforehand
 // in .env.

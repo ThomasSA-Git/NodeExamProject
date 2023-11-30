@@ -55,6 +55,7 @@ ul {
   flex: 9; /* Take up 90% of the space */
 }
 
+.edit-button,
 .delete-button {
   flex: 1; /* Take up 10% of the space */
   background: none;
@@ -65,6 +66,7 @@ ul {
   height: 20px;
 }
 
+.edit-image,
 .delete-image {
   width: 20px;
   height: 20px;

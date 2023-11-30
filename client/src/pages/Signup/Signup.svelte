@@ -1,5 +1,5 @@
 <script>
-  import { BASE_URL } from "../../store/stores.js";
+  import { BASE_URL } from "../../store/global.js";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
   import { showToast } from "../../assets/js/toast.js";
@@ -29,7 +29,7 @@
         const registrationMessage = await response.json();
 
         showToast(registrationMessage.message, "succes");
-     
+
         username = "";
         email = "";
         password = "";
@@ -43,21 +43,23 @@
         const errorMessage =
           errorData.error || "Login failed. Please check your credentials.";
         showToast(errorMessage, "error");
-       
+
         username = "";
         email = "";
         password = "";
       }
     } catch (error) {
-      showToast("An unexpected error occurred. Please try again later.", "error");
-  
+      showToast(
+        "An unexpected error occurred. Please try again later.",
+        "error"
+      );
+
       username = "";
       email = "";
       password = "";
     }
   }
 </script>
-
 
 <h1>Register new member</h1>
 
