@@ -16,6 +16,7 @@ ul {
   height: 40px; /* needed when empty */
 }
 .kan-col {
+
   flex: 1;
   border: 3px solid darkgray;
   border-radius: 5px;
@@ -24,21 +25,19 @@ ul {
   min-width: 230px;
   background-color: white(201, 205, 201);
 }
-
+.kan-container {
+  margin-left: 30px;
+  margin-right: 30px;
+}
 .list-name {
   flex: 9; /* Take up 90% of the space */
 }
-/* Style for editable list name */
-[contenteditable="true"] {
-  border: 1px solid darkgray;
-  padding: 5px;
-  border-radius: 3px;
-  margin-bottom: 10px;
-  flex: 9;
-}
+
 .btn-container {
   display: flex;
   justify-content: flex-end;
+  margin-left: 30px;
+  margin-right: 30px;
   margin-bottom: 20px;
 }
 
@@ -54,6 +53,8 @@ ul {
 
 .task-content {
   flex: 9; /* Take up 90% of the space */
+  border: 1px solid darkgray;
+  border-radius: 5px;
 }
 
 .edit-button,

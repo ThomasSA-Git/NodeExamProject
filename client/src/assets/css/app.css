@@ -41,9 +41,7 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -90,10 +88,15 @@ nav {
 a {
   text-decoration: none;
   color: white;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease-in-out;
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: white;
+  background-color: #555;
 }
 
 .nav-container {

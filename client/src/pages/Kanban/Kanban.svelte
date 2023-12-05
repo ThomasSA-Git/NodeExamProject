@@ -195,7 +195,7 @@
     {taskToUpdate}
   />
 {/if}
-
+<div class="kan-container">
 <div style="display: flex; gap: 20px; overflow-x: auto;">
   {#each kanban as list, listIndex (list)}
     <div animate:flip class="kan-col">
@@ -258,4 +258,5 @@
       </ul>
     </div>
   {/each}
+</div>
 </div>

@@ -22,8 +22,12 @@
       <h3>Kanban, diagram and notes</h3>
     </div>
     <div class="text-container">
-      <p>See kanban board <br>for project</p>
-      <button style="margin-top: 80px;" class="navigate-button" on:click={() => handleNavigate("/kanban")}>Kanban</button>
+      <p>See kanban board <br />for project</p>
+      <button
+        style="margin-top: 80px;"
+        class="navigate-button"
+        on:click={() => handleNavigate("/kanban")}>Kanban</button
+      >
     </div>
   </div>
 </div>
@@ -42,6 +46,8 @@
     border-radius: 20px;
     margin-bottom: 20px;
     margin-right: 20px;
+    margin-left: 30px;
+    margin-right: 30px;
   }
 
   h3 {
@@ -59,7 +65,7 @@
     margin-top: 75px;
     margin-left: -300px;
   }
-  button{
+  button {
     margin-left: -220px;
   }
 
