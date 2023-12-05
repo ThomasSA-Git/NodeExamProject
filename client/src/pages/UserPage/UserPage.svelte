@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { user } from "../../store/stores.js";
   import { BASE_URL } from "../../store/global.js";
-  import { currentProject } from "../../store/project";
+  import { currentProjectName, currentProjectId } from "../../store/project.js";
   import "../../assets/css/toast.css";
   import { showToast } from "../../assets/js/toast.js";
   import { navigate } from "svelte-navigator";
@@ -10,6 +10,8 @@
   let projectData = [];
 
   let newProjectName;
+
+
 
   onMount(async () => {
     try {
@@ -34,6 +36,8 @@
     }
   });
 
+  console.log(projectData)
+
   async function handleCreateProject() {
     try {
       const newProjectData = {
@@ -52,7 +56,7 @@
 
       if (response.ok) {
         const result = await response.json();
-        $currentProject = newProjectName; // or use result.projectName if it's returned
+        $currentProjectName = newProjectName; // or use result.projectName if it's returned
         navigate("/project");
       } else {
         const errorData = await response.json();
@@ -64,8 +68,11 @@
     }
   }
 
-  function handleNavigate(projectName) {
-    $currentProject = projectName;
+  function handleNavigate(projectName, projectId) {
+    console.log(projectId)
+    $currentProjectName = projectName;
+    $currentProjectId = projectId;
+
     navigate("/project");
   }
 </script>
@@ -75,15 +82,16 @@
   Here you can see a list of projects you're involved in or create a new
   project.
 </p>
-
+<form on:submit={handleCreateProject}>
 <label for="newProjectName">New project name</label>
 <input type="text" bind:value={newProjectName} required />
-<button on:click={handleCreateProject}>Submit</button>
+<button>Submit</button>
+</form>
 
 {#if projectData.length > 0}
 {#each projectData as project}
   <div class="column">
-    <button on:click={() => handleNavigate(project.projectName)}><h2>{project.projectName}</h2></button>
+    <button on:click={() => handleNavigate(project.projectName, project._id)}><h2>{project.projectName}</h2></button>
     <p>Users assigned to project:</p>
     <ul>
       {#each project.users as user}

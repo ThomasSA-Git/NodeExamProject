@@ -15,9 +15,8 @@ const db = await client.db(dbName);
 async function run() {
   try {
     await client.connect();
-    console.log("Connected to MongoDB Compass");
   } finally {
-    // Ensures that the client will close when you finish/error
+    // maybe not needed
     // await client.close();
   }
 }

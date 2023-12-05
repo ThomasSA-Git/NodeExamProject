@@ -37,7 +37,7 @@
           if ($role === "admin") {
             navigate("/adminpage");
           } else {
-            navigate("/memberpage");
+            navigate("/userpage");
           }
         }, 2000);
       } else {

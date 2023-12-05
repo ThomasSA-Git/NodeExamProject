@@ -18,6 +18,36 @@ export const createUser = async (username, email, password) => {
   }
 };
 
+export const addProjectIdToUser = async (username, projectId) => {
+  try {
+
+    const result = await db.users.updateOne(
+      { username: username },
+      { $addToSet: { projects: projectId } }
+    );
+    console.log("Project created successfully");
+    return result;
+  } catch (err) {
+    console.error("Error occurred while adding project", err);
+    throw err;
+  }
+};
+
+export const removeProjectIdFromUser = async (username, projectId) => {
+  try {
+    const result = await db.users.updateOne(
+      { username: username },
+      { $pull: { projects: projectId } }
+    );
+
+    console.log(`Project ${projectId} removed successfully`);
+    return result;
+  } catch (err) {
+    console.error(`Error occurred while removing project ${projectId}`, err);
+    throw err;
+  }
+};
+
 export const findUserByUsername = async (username) => {
   try {
     const result = await db.users.findOne({ username });

@@ -1,13 +1,10 @@
-import dotenv from "dotenv";
-
-dotenv.config();
-
 import express from "express";
-
 const app = express();
 
-import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
+import cors from "cors";
 // cors, can be set up with options for specific url.
 app.use(
   cors({
@@ -16,20 +13,31 @@ app.use(
   })
 );
 
-import rateLimit from "express-rate-limit";
+import http from "http";
+const server = http.createServer(app);
 
-app.use(express.json());
+import { Server } from "socket.io";
+export const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["*"],
+  },
+});
 
 import session from "express-session";
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false, //wont resave if there aren't any changes in session. Should be false.
-    saveUninitialized: true, //if there isnt any session, should there be saved if client calls backed
-    cookie: { secure: false }, //true if running on https. Should be set to true when deployed
-  })
-);
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false },
+});
+
+app.use(sessionMiddleware);
+
+app.use(express.json());
+
+import rateLimit from "express-rate-limit";
 
 const allRoutesRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -56,8 +64,8 @@ app.use("/auth", authRateLimiter);
 import contactRouter from "./routers/concactRouter.js";
 app.use(contactRouter);
 
-import memberRouter from "./routers/MemberRouter.js";
-app.use(memberRouter);
+import userRouter from "./routers/userRouter.js";
+app.use(userRouter);
 
 import adminRouter from "./routers/adminRouter.js";
 app.use(adminRouter);
@@ -65,17 +73,46 @@ app.use(adminRouter);
 import projectRouter from "./routers/projectRouter.js";
 app.use(projectRouter);
 
-// Used for creating an admin user on start up. Only for making it easier.
-// If deployed it wouldnt be added here, and password would be set beforehand
-// in .env.
-import { createAdminUser, findUserByUsername } from "./db/usersDb.js";
-import { hashPassword } from "./util/bcrypt.js";
-if (!findUserByUsername("admin")) {
-  const adminPassword = hashPassword("admin")
-  await createAdminUser(adminPassword);
-  console.log("admin created")
-}
+const wrap = (middleware) => (socket, next) =>
+  middleware(socket.request, {}, next);
+io.use(wrap(sessionMiddleware));
+
+import { findProjectByProjectId, updateKanban } from "./db/projectsDb.js";
+
+import { purifyKanbanList } from "./util/DOMpurify.js";
+
+let count = 0;
+
+io.on("connection", (socket) => {
+  socket.on("update-kanban", async (data) => {
+
+    count += 1;
+    console.log(count)
+    console.log(data.kanban)
+    const purifiedKanban = data.kanban.map(purifyKanbanList); 
+    const result = await updateKanban(data.projectId, purifiedKanban);
+    if(result.acknowledged && result.matchedCount){
+      io.emit("update-success", { message: "Kanban saved successfully" })
+    }
+    else {
+      io.emit("update-failure", { message: "Kanban save failed" })
+    }
+  });
+    socket.on("load-kanban", async (projectId) => {
+      try {
+        const project = await findProjectByProjectId(projectId);
+        
+        io.emit("kanban-data", project.kanban);
+      } catch (error) {
+        console.error("Error loading kanban data", error);
+        // Handle the error, emit an error event or something
+      }
+    });
+  
+});
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => console.log("Running on port:", PORT));
+server.listen(PORT, () => {
+  console.log("Server running on port", PORT);
+});

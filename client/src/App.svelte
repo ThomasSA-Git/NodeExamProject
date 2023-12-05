@@ -4,13 +4,14 @@
   import Login from "./pages/Login/Login.svelte";
   import Signup from "./pages/Signup/Signup.svelte";
   import Contact from "./pages/Contact/Contact.svelte";
-  import Member from "./pages/MemberPage/MemberPage.svelte";
+  import User from "./pages/UserPage/UserPage.svelte";
   import Admin from "./pages/Admin/Admin.svelte";
   import PrivateRoute from "./components/RouteProtection/PrivateRoute.svelte";
   import ResetPassword from "./pages/ResetPassword/ResetPassword.svelte";
   import Kanban from "./pages/Kanban/Kanban.svelte";
   import Project from "./pages/Project/Project.svelte";
   import { user, role } from "./store/stores.js";
+  import { currentProjectId } from "./store/project";
   import { url } from "./util/apiUrl";
   import Diagram from "./pages/Diagram/Diagram.svelte";
 
@@ -46,9 +47,7 @@
 
     <Link to="/contact">Contact</Link>
 
-    <Link to="/memberpage">Member</Link>
-
-    <Link to="/kanban">Kanban</Link>
+    <Link to="/userpage">User start</Link>
 
     <Link to="/diagram">Diagram</Link>
 
@@ -67,11 +66,13 @@
     <Route path="/signup"><Signup /></Route>
     <Route path="/resetpassword"><ResetPassword /></Route>
     <Route path="/contact"><Contact /></Route>
-    <Route path="/kanban"><Kanban /></Route>
     <Route path="/diagram"><Diagram /></Route>
-    <PrivateRoute path="/project"><Project /></PrivateRoute>
-    <PrivateRoute path="/memberpage" let:location>
-      <Member />
+
+
+    <PrivateRoute path="/project" let:location><Project /></PrivateRoute>
+    <PrivateRoute path="/kanban" let:location><Kanban /></PrivateRoute>
+    <PrivateRoute path="/userpage" let:location>
+      <User />
     </PrivateRoute>
     <PrivateRoute path="/adminpage" let:location>
       <Admin />

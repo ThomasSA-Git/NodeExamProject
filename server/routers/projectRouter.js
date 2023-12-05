@@ -8,6 +8,8 @@ import {
   findProjectsByUser,
 } from "../db/projectsDb.js";
 
+import { addProjectIdToUser, removeProjectIdFromUser } from "../db/usersDb.js";
+
 import { purify } from "../util/DOMpurify.js";
 
 function isAuthenticated(req, res, next) {
@@ -18,25 +20,31 @@ function isAuthenticated(req, res, next) {
   }
 }
 
-router.get("/api/projects/byUserName/:username", isAuthenticated, async (req, res) => {
-  try {
-    const projects = await findProjectsByUser(req.params.username);
+router.get(
+  "/api/projects/byUserName/:username",
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const projects = await findProjectsByUser(req.params.username);
 
-    res.send({ data: projects });
-  } catch (error) {
-    console.error("Error in getting project", error);
-    res.status(500).json({ error: "Internal server error" });
+      res.send({ data: projects });
+    } catch (error) {
+      console.error("Error in getting project", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-});
+);
 
-router.post("/api/projects", /* isAuthenticated, */ async (req, res) => {
+router.post("/api/projects", isAuthenticated, async (req, res) => {
   try {
     const { projectName, username } = req.body;
 
     const purifiedProjectName = purify(projectName);
     const purifiedUsername = purify(username);
 
-    await createProject(purifiedProjectName, purifiedUsername);
+    const project = await createProject(purifiedProjectName, purifiedUsername);
+
+    await addProjectIdToUser(purifiedUsername, project.insertedId);
 
     res.status(201).json({ message: "Project created successfully" });
   } catch (error) {
@@ -46,15 +54,17 @@ router.post("/api/projects", /* isAuthenticated, */ async (req, res) => {
 });
 
 router.delete(
-  "/api/projects/:projectName",
+  "/api/projects/:projectId",
   isAuthenticated,
   async (req, res) => {
     try {
-      const projectName = req.params.projectName;
+      const projectId = req.params.projectId;
 
-      await deleteProject(projectName);
+      await deleteProject(projectId);
 
-      res.json({ message: `Project '${projectName}' deleted successfully.` });
+      await removeProjectIdFromUser(projectId);
+
+      res.json({ message: `Project '${projectId}' deleted successfully.` });
     } catch (error) {
       console.error("Error in delete project", error);
       res.status(500).json({ error: "Internal server error" });

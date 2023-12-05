@@ -1,3 +1,5 @@
 import { writable } from "svelte/store";
 
-export const currentProject = writable(null);
+export const currentProjectName = writable(null);
+
+export const currentProjectId = writable(null);

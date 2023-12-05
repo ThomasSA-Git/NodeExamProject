@@ -21,7 +21,8 @@ ul {
   border-radius: 5px;
   padding: 10px;
   min-height: 500px;
-  background-color: lightgreen;
+  min-width: 230px;
+  background-color: white(201, 205, 201);
 }
 
 .list-name {

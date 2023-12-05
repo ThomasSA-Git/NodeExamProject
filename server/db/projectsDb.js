@@ -1,12 +1,12 @@
+import { ObjectId } from "mongodb";
 import db from "./connection.js";
 
 export const createProject = async (projectName, username) => {
   try {
     const project = {
       projectName,
-      users: [
-        username,
-      ],
+      users: [username],
+      kanban: [],
     };
 
     const result = await db.projects.insertOne(project);
@@ -48,9 +48,10 @@ export const findProjectsByUser = async (username) => {
   }
 };
 
-export const findProjectByProjectName = async (projectName) => {
+export const findProjectByProjectId = async (projectId) => {
   try {
-    const result = await db.projects.findOne({ projectName });
+    const _id = new ObjectId(projectId);
+    const result = await db.projects.findOne({ _id });
     return result;
   } catch (err) {
     console.error("Error occurred while finding project", err);
@@ -68,11 +69,36 @@ export const findAllProjects = async () => {
   }
 };
 
-export const deleteProject = async (projectName) => {
+export const deleteProject = async (projectId) => {
   try {
-    await db.projects.deleteOne({ projectName });
+
+    const _id = new ObjectId(projectId);
+    await db.projects.deleteOne({ _id });
   } catch (err) {
     console.error("Error occured while deleting project");
+    throw err;
+  }
+};
+
+export const updateKanban = async (projectId, kanban) => {
+  try {
+
+    const _id = new ObjectId(projectId);
+
+    const result = await db.projects.updateOne(
+      { _id },
+      { $set: { kanban: kanban } }
+    );
+
+  /*   if (result.modifiedCount === 1) {
+      console.log("Project kanban updated successfully");
+    } else {
+      console.log("Kanban not found or kanban not updated");
+    } */
+
+    return result;
+  } catch (err) {
+    console.error("Error occurred while updating Kanban", err);
     throw err;
   }
 };
