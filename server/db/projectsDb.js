@@ -1,16 +1,18 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, Timestamp } from "mongodb";
 import db from "./connection.js";
 
 export const createProject = async (projectName, username) => {
   try {
+    const createdAt = Date.now();
+
     const project = {
       projectName,
       users: [username],
       kanban: [],
+      createdAt,
     };
 
     const result = await db.projects.insertOne(project);
-    console.log("Project created successfully");
     return result;
   } catch (err) {
     console.error("Error occurred while creating project", err);

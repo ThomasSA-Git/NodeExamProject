@@ -62,10 +62,10 @@
     <input id="url" bind:value={url}>
 
     <label for="startDate">Start Date:</label>
-    <input type="date" id="startDate" bind:value={startDate} required>
+    <input type="date" id="startDate" bind:value={startDate}>
 
     <label for="endDate">End Date:</label>
-    <input type="date" id="endDate" bind:value={endDate} required>
+    <input type="date" id="endDate" bind:value={endDate}>
 
     <button type="submit">Create Task</button>
   </form>

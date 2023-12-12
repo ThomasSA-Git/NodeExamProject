@@ -54,7 +54,7 @@
     event.preventDefault();
     const json = event.dataTransfer.getData("text/plain");
     const data = JSON.parse(json);
-
+    
     const [task] = kanban[data.listIndex].tasks.splice(data.taskIndex, 1);
 
     kanban[listIndex].tasks.push(task);
@@ -137,7 +137,9 @@
       socket.on("kanban-data", (data) => {
         console.log(data);
         if (data && Array.isArray(data)) {
+          if(data.length > 0){
           kanban = data;
+        }
         }
       });
     } catch (error) {
@@ -158,12 +160,12 @@
   }
 
   function handleUpdateKanban() {
-    socket.emit("update-kanban", { kanban, projectId: $currentProjectId });
-    socket.on("update-success", (data) => {
+    socket.emit("save-kanban", { kanban, projectId: $currentProjectId });
+    socket.on("save-success", (data) => {
       showToast(data.message, "success");
       startUpdateInterval();
     });
-    socket.on("update-failure", (data) => {
+    socket.on("save-failure", (data) => {
       showToast(data.message, "error");
     });
   }
@@ -220,7 +222,7 @@
         on:dragleave={() => (hoveringOverList = null)}
         on:drop={(event) => drop(event, listIndex)}
         ondragover="return false"
-        style="list-style-type: none; padding: 0;"
+        style="list-style-type: none; padding: 0; height: 420px; overflow-y: auto;"
       >
         {#each list.tasks as task, taskIndex (task)}
           <div class="task" animate:flip>

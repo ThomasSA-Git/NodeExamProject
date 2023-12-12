@@ -52,10 +52,10 @@
       <input id="updatedUrl" bind:value={updatedUrl}>
   
       <label for="updatedStartDate">Start Date:</label>
-      <input type="date" id="updatedStartDate" bind:value={updatedStartDate} required>
+      <input type="date" id="updatedStartDate" bind:value={updatedStartDate}>
   
       <label for="updatedEndDate">End Date:</label>
-      <input type="date" id="updatedEndDate" bind:value={updatedEndDate} required>
+      <input type="date" id="updatedEndDate" bind:value={updatedEndDate}>
   
       <button type="submit">Update Task</button>
     </form>

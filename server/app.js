@@ -84,7 +84,7 @@ import { purifyKanbanList } from "./util/DOMpurify.js";
 let count = 0;
 
 io.on("connection", (socket) => {
-  socket.on("update-kanban", async (data) => {
+  socket.on("save-kanban", async (data) => {
 
     count += 1;
     console.log(count)
@@ -92,10 +92,10 @@ io.on("connection", (socket) => {
     const purifiedKanban = data.kanban.map(purifyKanbanList); 
     const result = await updateKanban(data.projectId, purifiedKanban);
     if(result.acknowledged && result.matchedCount){
-      io.emit("update-success", { message: "Kanban saved successfully" })
+      io.emit("save-success", { message: "Kanban saved successfully" })
     }
     else {
-      io.emit("update-failure", { message: "Kanban save failed" })
+      io.emit("save-failure", { message: "Kanban save failed" })
     }
   });
     socket.on("load-kanban", async (projectId) => {
