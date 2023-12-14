@@ -79,7 +79,7 @@
   }
 
   function addTask(newTask) {
-    // Add the new task to the first index of the lists array
+    // Adds the new task to the first index of the lists array
     kanban[0].tasks = [newTask, ...kanban[0].tasks];
   }
 
@@ -101,7 +101,7 @@
   function openUpdateModal(listIndex, taskIndex, task) {
     taskToUpdate = task;
     updateTaskIndex = taskIndex;
-    listIndexToUpdate = listIndex; // Add this line to capture listIndex
+    listIndexToUpdate = listIndex;
     isUpdateModalOpen = true;
   }
 
@@ -110,23 +110,22 @@
   }
 
   function updateTask(updatedTask) {
-    // Update the task in the correct list and at the correct index
+    // Updates the task in the correct list and at the correct index
     kanban[listIndexToUpdate].tasks[updateTaskIndex] = updatedTask;
 
-    // Trigger reactivity
     kanban = [...kanban];
     closeUpdateModal();
   }
 
   function deleteTask(listIndex, taskIndex) {
     kanban[listIndex].tasks.splice(taskIndex, 1);
-    // Update tasks on lists array to trigger reactivity
+    // Updates tasks on lists array to trigger reactivity
     kanban = [...kanban];
   }
 
   function deleteList(listIndex) {
     kanban.splice(listIndex, 1);
-    // Update lists array to trigger reactivity
+    // Updates lists array to trigger reactivity
     kanban = [...kanban];
   }
 
@@ -155,11 +154,11 @@
 
     // Set a new interval
     updateInterval = setInterval(() => {
-      handleUpdateKanban();
+      handleSaveKanban();
     }, 120000);
   }
 
-  function handleUpdateKanban() {
+  function handleSaveKanban() {
     socket.emit("save-kanban", { kanban, projectId: $currentProjectId });
     socket.on("save-success", (data) => {
       showToast(data.message, "success");
@@ -180,7 +179,7 @@
   <h3 style="margin-right: 300px;">Kanban board for {$currentProjectName}</h3>
   <button class="btn-container-btn" on:click={handleAddList}>Add list</button>
   <button class="btn-container-btn" on:click={openModal}>Add Task</button>
-  <button class="btn-container-btn" on:click={handleUpdateKanban}
+  <button class="btn-container-btn" on:click={handleSaveKanban}
     >Save kanban</button
   >
   <button class="navigate-button" on:click={() => handleNavigate("/project")}>Project overview</button>

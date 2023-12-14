@@ -14,13 +14,12 @@
     const dispatch = createEventDispatcher();
   
     function handleSubmit() {
-      // Validate input fields
       if (!updatedTaskName || !updatedStartDate || !updatedEndDate) {
         
         return;
       }
   
-      // Dispatch an event to update the task
+      // Dispatches an event to update the task
       updateTask({
         name: updatedTaskName,
         description: updatedDescription,
