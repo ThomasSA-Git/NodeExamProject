@@ -73,6 +73,9 @@ app.use(adminRouter);
 import projectRouter from "./routers/projectRouter.js";
 app.use(projectRouter);
 
+import noteRouter from "./routers/noteRouter.js";
+app.use(noteRouter);
+
 const wrap = (middleware) => (socket, next) =>
   middleware(socket.request, {}, next);
 io.use(wrap(sessionMiddleware));

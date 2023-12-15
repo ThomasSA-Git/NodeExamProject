@@ -5,10 +5,12 @@
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
   import { showToast } from "../../assets/js/toast";
+  import { paginate, LightPaginationNav } from "svelte-paginate";
   import * as d3 from "d3";
 
   let kanban = [];
   let users = [];
+
 
   onMount(async () => {
     try {

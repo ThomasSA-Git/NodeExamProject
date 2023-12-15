@@ -9,6 +9,7 @@ export const createProject = async (projectName, username) => {
       projectName,
       users: [username],
       kanban: [],
+      notes: [],
       createdAt,
     };
 
@@ -24,7 +25,7 @@ export const addUserToProject = async (projectName, username) => {
   try {
     const result = await db.projects.updateOne(
       { projectName },
-      { $addToSet: { users: username } } // Add username to the users array if not already present
+      { $addToSet: { users: username } }
     );
 
     if (result.modifiedCount === 1) {
@@ -92,11 +93,6 @@ export const updateKanban = async (projectId, kanban) => {
       { $set: { kanban: kanban } }
     );
 
-  /*   if (result.modifiedCount === 1) {
-      console.log("Project kanban updated successfully");
-    } else {
-      console.log("Kanban not found or kanban not updated");
-    } */
 
     return result;
   } catch (err) {
@@ -104,3 +100,24 @@ export const updateKanban = async (projectId, kanban) => {
     throw err;
   }
 };
+
+export const createNote = async (projectId, note) => {
+  try {
+
+    const _id = new ObjectId(projectId);
+
+    console.log(note)
+
+    const result = await db.projects.updateOne(
+      { _id },
+      { $push: { notes: note } }
+    );
+
+      console.log(result)
+    return result;
+  } catch (err) {
+    console.error("Error occurred while updating Kanban", err);
+    throw err;
+  }
+};
+

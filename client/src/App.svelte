@@ -10,6 +10,7 @@
   import ResetPassword from "./pages/ResetPassword/ResetPassword.svelte";
   import Kanban from "./pages/Kanban/Kanban.svelte";
   import Project from "./pages/Project/Project.svelte";
+  import NoteSystem from "./pages/NoteSystem/NoteSystem.svelte";
   import { user, role } from "./store/stores.js";
   import { currentProjectId } from "./store/project";
   import { url } from "./util/apiUrl";
@@ -51,6 +52,9 @@
 
     <Link to="/diagram">Diagram</Link>
 
+    <Link to="/notes">Notes</Link>
+
+
     {#if $user != null && $role == "admin"}
       <Link to="/adminpage">Admin</Link>
     {/if}
@@ -67,7 +71,7 @@
     <Route path="/resetpassword"><ResetPassword /></Route>
     <Route path="/contact"><Contact /></Route>
     <Route path="/diagram"><Diagram /></Route>
-
+    <Route path="/notes"><NoteSystem /></Route>
 
     <PrivateRoute path="/project" let:location><Project /></PrivateRoute>
     <PrivateRoute path="/kanban" let:location><Kanban /></PrivateRoute>
