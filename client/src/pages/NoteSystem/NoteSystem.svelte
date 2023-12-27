@@ -1,76 +1,83 @@
 <script>
-  import EditorJS from '@editorjs/editorjs';
-  import { onMount } from 'svelte';
-  import { BASE_URL } from '../../store/global';
-  import { currentProjectId } from '../../store/project';
+  import EditorJS from "@editorjs/editorjs";
+  import { onMount } from "svelte";
+  import { BASE_URL } from "../../store/global";
+  import { currentProjectId, currentNoteName } from "../../store/project";
+  import { showToast } from "../../assets/js/toast.js";
+  import "../../assets/css/toast.css";
+  import { navigate } from "svelte-navigator";
 
   let editor;
 
-  let newNoteName
+  onMount(loadData);
 
-/*   onMount(loadData); */
-
-
-  // Sample data to load initially
-  let initialData = {
-    time: 1556098174501,
-    blocks: [
-      {
-        type: 'paragraph',
-        data: {
-          text: 'Hello, Editor.js!',
-        },
-      },
-    ],
-    version: '2.12.4',
-  };
+  let noteData;
 
   function initializeEditor() {
     editor = new EditorJS({
-      holder: 'editorjs',
+      holder: "editorjs",
       autofocus: true,
-      data: initialData,
+      data: noteData,
     });
   }
 
-  async function handleSave() {
+  async function loadData() {
     try {
-      const outputData = await editor.save();
-
-      const noteData = {
-        projectId: $currentProjectId,
-        note: {
-          noteName: newNoteName,
-          outputData
-        }
-      }
-
-      // Handle the saved data (outputData)
-      console.log('Saved data:', outputData);
-
-      const response = await fetch($BASE_URL + '/notes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(noteData),
-        credentials: 'include',
+      const response = await fetch($BASE_URL + `/notes/${$currentNoteName}`, {
+        credentials: "include",
       });
-
-      if (response.ok) {
-        console.log('Data saved successfully!');
-      } else {
-        console.error('Failed to save data:', response.statusText);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
+      const data = await response.json();
+      noteData = data[0].note;
+      initializeEditor();
     } catch (error) {
-      console.error('Error during save:', error);
+      showToast(error, "error");
     }
   }
 
-//   async function loadData() {
-//  await fetch($BASE_URL + "/notes" /* + input note id here*/)
-//  }
+  async function handleUpdate() {
+    try {
+      const savedNoteData = await editor.save();
+
+      // Prepare the updated note object without wrapping it in an array
+      const updatedNote = {
+        noteName: $currentNoteName,
+        note: savedNoteData,
+      };
+      const response = await fetch($BASE_URL + "/notes/" + $currentNoteName, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedNote),
+        credentials: "include",
+      });
+      if (response.ok) {
+        const result = await response.json();
+        showToast(result.message, "success");
+      } else {
+        const errorData = await response.json();
+        showToast(errorData.message, "error");
+      }
+    } catch (error) {
+      showToast(`Save failed. Error: ${error.message}`, "error");
+    }
+  }
+
+  function handleNavigate() {
+    navigate("/noteOverview");
+  }
 </script>
+
+<div>
+
+  <button on:click={handleUpdate}>Save changes</button>
+  <button class="navigate-button" on:click={handleNavigate}>Back</button>
+  <div id="editorjs"></div>
+</div>
 
 <style>
   #editorjs {
@@ -78,16 +85,3 @@
     border: 1px solid #ccc;
   }
 </style>
-
-<div>
-  <form on:submit={handleSave}>
-    <label for="newNoteName">New note name</label>
-    <input type="text" bind:value={newNoteName} required />
-    <button>Save</button>
-  </form>
-  
- <!--  <button on:click={loadData}>Load Data</button> -->
-  <button on:click={initializeEditor}>Initialize Editor</button>
-
-  <div id="editorjs"></div>
-</div>

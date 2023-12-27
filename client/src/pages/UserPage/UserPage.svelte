@@ -27,7 +27,7 @@
   async function loadProjects() {
     try {
       const response = await fetch(
-        $BASE_URL + `/projects/byUserName/${$user}`,
+        $BASE_URL + `/projects`,
         {
           credentials: "include",
         }
@@ -83,7 +83,6 @@
   }
 
   function handleNavigate(projectName, projectId) {
-    console.log(projectId);
     $currentProjectName = projectName;
     $currentProjectId = projectId;
 

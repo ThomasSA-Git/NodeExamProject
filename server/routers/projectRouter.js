@@ -10,7 +10,10 @@ import {
 
 import { addProjectIdToUser, removeProjectIdFromUser } from "../db/usersDb.js";
 
-import { dataForProjectPage, convertTimestampToDate } from "../dto/projectDataResponse.js";
+import {
+  dataForProjectPage,
+  convertTimestampToDate,
+} from "../dto/projectDataResponse.js";
 
 import { purify } from "../util/DOMpurify.js";
 
@@ -22,24 +25,25 @@ function isAuthenticated(req, res, next) {
   }
 }
 
-router.get("/api/projects/:projectId", isAuthenticated, async(req, res) => {
+router.get("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.params.projectId;
+    req.session.projectId = projectId;
     const projectData = await dataForProjectPage(projectId);
     res.send({ projectData });
-  } catch(error) {
+  } catch (error) {
     console.error("Error in getting project", error);
     res.status(500).json({ error: "Internal server error" });
   }
-})
+});
 
 router.get(
-  "/api/projects/byUserName/:username",
+  "/api/projects",
   isAuthenticated,
   async (req, res) => {
     try {
-      const projects = await findProjectsByUser(req.params.username);
-      console.log(projects)
+      const username = req.session.user.username;
+      const projects = await findProjectsByUser(username);
       const projectsWithDates = projects.map(convertTimestampToDate);
       res.send({ data: projectsWithDates });
     } catch (error) {
@@ -67,23 +71,19 @@ router.post("/api/projects", isAuthenticated, async (req, res) => {
   }
 });
 
-router.delete(
-  "/api/projects/:projectId",
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const projectId = req.params.projectId;
+router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
 
-      await deleteProject(projectId);
+    await deleteProject(projectId);
 
-      await removeProjectIdFromUser(projectId);
+    await removeProjectIdFromUser(projectId);
 
-      res.json({ message: `Project '${projectId}' deleted successfully.` });
-    } catch (error) {
-      console.error("Error in delete project", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
+    res.json({ message: `Project '${projectId}' deleted successfully.` });
+  } catch (error) {
+    console.error("Error in delete project", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-);
+});
 
 export default router;

@@ -15,8 +15,10 @@
   import { currentProjectId } from "./store/project";
   import { url } from "./util/apiUrl";
   import Diagram from "./pages/Diagram/Diagram.svelte";
+  import NoteOverview from "./pages/NoteOverview/NoteOverview.svelte";
 
   import { onMount } from "svelte";
+
 
   onMount(() => {
     // Check for user in localStorage
@@ -75,6 +77,7 @@
 
     <PrivateRoute path="/project" let:location><Project /></PrivateRoute>
     <PrivateRoute path="/kanban" let:location><Kanban /></PrivateRoute>
+    <PrivateRoute path="/noteOverview" let:location><NoteOverview /></PrivateRoute>
     <PrivateRoute path="/userpage" let:location>
       <User />
     </PrivateRoute>

@@ -50,9 +50,7 @@
         username = "";
         password = "";
       }
-    } catch (error) {
-      console.log(error);
-      
+    } catch (error) {      
       showToast(`Login failed. Error: ${error.message}`, 'error');
       username = "";
       password = "";
