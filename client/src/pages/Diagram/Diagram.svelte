@@ -35,8 +35,27 @@
     }
   ];
 
+/*   let intitialEdges = [
+    {
+      id: '1-2',
+      source: '1',
+      target: '2',
+    },
+    {
+      id: '1-3',
+      source: '1',
+      target: '3',
+    },
+    {
+      id: '2-3',
+      source: '2',
+      target: '3',
+    }
+  ]; */
+
   const nodes = writable(intitialNodes);
 
+  //const edges = writable(intitialEdges);
   const edges = writable([
     {
       id: '1-2',
@@ -76,7 +95,8 @@
   }
 
   function handleLog(){
-    console.log(intitialNodes[3])
+    console.log(intitialNodes[5])
+    console.log(edges)
   }
 
   function handleAddNode(){

@@ -61,9 +61,6 @@ import authRouter from "./routers/authRouter.js";
 app.use(authRouter);
 app.use("/auth", authRateLimiter);
 
-import contactRouter from "./routers/concactRouter.js";
-app.use(contactRouter);
-
 import userRouter from "./routers/userRouter.js";
 app.use(userRouter);
 
@@ -76,22 +73,45 @@ app.use(projectRouter);
 import noteRouter from "./routers/noteRouter.js";
 app.use(noteRouter);
 
+import { sessionUser } from "./routers/authRouter.js";
+
 const wrap = (middleware) => (socket, next) =>
-  middleware(socket.request, {}, next);
+  middleware(socket.request, {}, async (err) => {
+    const { projectId, username } = socket.handshake.query;
+
+    try {
+      // Access the session through the express-session API
+      const session = socket.request.session;
+
+      if (!session) {
+        throw new Error("Session not available");
+      }
+
+      session.user = { username }; // Set the user information to session
+
+      // Validate the user information as needed
+      if (sessionUser === username) {
+        return next();
+      } else {
+        return next(new Error("Unauthorized"));
+      }
+    } catch (error) {
+      console.error("Error setting user in session:", error);
+      return next(new Error("Unauthorized"));
+    }
+  });
 io.use(wrap(sessionMiddleware));
 
 import { findProjectByProjectId, updateKanban } from "./db/projectsDb.js";
 
 import { purifyKanbanList } from "./util/DOMpurify.js";
 
-let count = 0;
 
 io.on("connection", (socket) => {
+  
   socket.on("save-kanban", async (data) => {
 
-    count += 1;
-    console.log(count)
-    console.log(data.kanban)
+
     const purifiedKanban = data.kanban.map(purifyKanbanList); 
     const result = await updateKanban(data.projectId, purifiedKanban);
     if(result.acknowledged && result.matchedCount){
@@ -101,9 +121,9 @@ io.on("connection", (socket) => {
       io.emit("save-failure", { message: "Kanban save failed" })
     }
   });
-    socket.on("load-kanban", async (projectId) => {
+    socket.on("load-kanban", async (data) => {
       try {
-        const project = await findProjectByProjectId(projectId);
+        const project = await findProjectByProjectId(data.projectId);
         
         io.emit("kanban-data", project.kanban);
       } catch (error) {

@@ -3,7 +3,6 @@
   import Home from "./pages/Home/Home.svelte";
   import Login from "./pages/Login/Login.svelte";
   import Signup from "./pages/Signup/Signup.svelte";
-  import Contact from "./pages/Contact/Contact.svelte";
   import User from "./pages/UserPage/UserPage.svelte";
   import Admin from "./pages/Admin/Admin.svelte";
   import PrivateRoute from "./components/RouteProtection/PrivateRoute.svelte";
@@ -48,13 +47,9 @@
       <Link to="/signup">Signup</Link><br />
     {/if}
 
-    <Link to="/contact">Contact</Link>
-
     <Link to="/userpage">User start</Link>
 
     <Link to="/diagram">Diagram</Link>
-
-    <Link to="/notes">Notes</Link>
 
 
     {#if $user != null && $role == "admin"}
@@ -71,7 +66,6 @@
     <Route path="/login"><Login /></Route>
     <Route path="/signup"><Signup /></Route>
     <Route path="/resetpassword"><ResetPassword /></Route>
-    <Route path="/contact"><Contact /></Route>
     <Route path="/diagram"><Diagram /></Route>
     <Route path="/notes"><NoteSystem /></Route>
 

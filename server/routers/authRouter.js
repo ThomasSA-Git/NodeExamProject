@@ -33,6 +33,8 @@ import {
 
 import { purify } from "../util/DOMpurify.js";
 
+export let sessionUser;
+
 router.post("/api/auth/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -46,7 +48,7 @@ router.post("/api/auth/login", async (req, res) => {
     if (match) {
       // Store user information in the session
       req.session.user = user;
-      console.log("Login succesful.");
+      sessionUser = user.username;
       // Send username and role to use for auth clientside.
       res.json({
         username: req.session.user.username,
@@ -92,6 +94,7 @@ router.post("/api/auth/register", async (req, res) => {
 router.get("/api/auth/logout", (req, res) => {
   // delete session
   delete req.session.user;
+  sessionUser = undefined;
   // maybe delete below, not necessary
   res.send({ data: "You're logged out." });
 });

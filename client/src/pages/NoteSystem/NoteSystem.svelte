@@ -1,5 +1,11 @@
 <script>
   import EditorJS from "@editorjs/editorjs";
+  import Header from "@editorjs/header";
+  import Paragraph from 'editorjs-paragraph-with-alignment';
+  import Quote from "@editorjs/quote";
+  import Alert from "editorjs-alert";
+  import List from "@editorjs/list";
+  import Alignment from "editorjs-text-alignment-blocktune";
   import { onMount } from "svelte";
   import { BASE_URL } from "../../store/global";
   import { currentProjectId, currentNoteName } from "../../store/project";
@@ -18,6 +24,20 @@
       holder: "editorjs",
       autofocus: true,
       data: noteData,
+      tools: {
+        header: {
+          class: Header,
+          tunes: ['anyTuneName'],  
+        },
+        paragraph: {
+          class: Paragraph
+        },
+        quote: Quote,
+        alert: Alert,
+        list: List,
+        anyTuneName: Alignment
+      }
+      
     });
   }
 

@@ -35,7 +35,7 @@ catch(error){
 }
 });
 
-router.get("/api/notes", async (req, res) => {
+router.get("/api/notes", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.session.projectId;
     const notes = await findNotesByProjectId(projectId);
@@ -46,7 +46,7 @@ router.get("/api/notes", async (req, res) => {
   }
 });
 
-router.get("/api/notes/:noteName", async (req, res) => {
+router.get("/api/notes/:noteName", isAuthenticated, async (req, res) => {
   const noteName = req.params.noteName;
   const projectId = req.session.projectId;
   try {

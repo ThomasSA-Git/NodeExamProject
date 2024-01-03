@@ -9,12 +9,18 @@
   import { IO_URL } from "../../store/global";
   import io from "socket.io-client";
   import { onMount } from "svelte";
-  import { currentProjectId } from "../../store/project";
-  import { currentProjectName } from "../../store/project";
+  import { currentProjectId, currentProjectName } from "../../store/project";
+  import { user } from "../../store/stores";
   import { showToast } from "../../assets/js/toast.js";
   import { navigate } from "svelte-navigator";
 
-  const socket = io($IO_URL);
+  const socket = io($IO_URL, {
+  query: {
+    projectId: $currentProjectId,
+    username: $user,
+  },
+});
+
 
   let kanban = [
     {
@@ -131,7 +137,7 @@
 
   onMount(async () => {
     try {
-      socket.emit("load-kanban", await $currentProjectId);
+      socket.emit("load-kanban", { projectId: $currentProjectId, username: $user });
 
       socket.on("kanban-data", (data) => {
         console.log(data);
@@ -158,8 +164,15 @@
     }, 120000);
   }
 
+  socket.on("connect_error", (error) => {
+  if (error.message === "Unauthorized") {
+    // Handle unauthorized connection, redirect to login or show an error message
+    showToast(error.message , "error");
+  }
+});
+
   function handleSaveKanban() {
-    socket.emit("save-kanban", { kanban, projectId: $currentProjectId });
+    socket.emit("save-kanban", { kanban, projectId: $currentProjectId, username: $user });
     socket.on("save-success", (data) => {
       showToast(data.message, "success");
       startUpdateInterval();

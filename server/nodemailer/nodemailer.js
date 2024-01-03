@@ -31,13 +31,6 @@ export async function sendFakeEmail(userEmail, subject, message) {
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
   };
 
-  export const contactMailSubject = "Message sent."
-  //export const contactMailMessage = "Your message has been submitted."
-
-  export function contactMailMessage(message){
-    return `You have submitted the follow message: ${message}`;
-  }
-
   export const registerMailSubject = "Registration"
   export function registerMailMessage(username){
     return `You have succesfully been registered with the username: ${username}`;
