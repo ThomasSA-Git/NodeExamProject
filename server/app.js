@@ -73,6 +73,9 @@ app.use(projectRouter);
 import noteRouter from "./routers/noteRouter.js";
 app.use(noteRouter);
 
+import diagramRouter from "./routers/diagramRouter.js";
+app.use(diagramRouter);
+
 import { sessionUser } from "./routers/authRouter.js";
 
 const wrap = (middleware) => (socket, next) =>

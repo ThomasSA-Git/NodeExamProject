@@ -1,17 +1,34 @@
 <script>
-  import { Handle, Position } from '@xyflow/svelte';
+  import { Handle, Position, useSvelteFlow } from '@xyflow/svelte';
+  import { onMount } from 'svelte';
+  
+  export let node = { data: { label: "", text: "" } };
 
-  export let positionAbsolute = { x:0, y:0 };
+  export let id;
+
+  const { updateNodeData } = useSvelteFlow();
+
+  function handleInputLabel(event) {
+  if (typeof updateNodeData === 'function') {
+    updateNodeData(id, { label: event.target.value });
+  }
+  }
+  function handleInputText(event) {
+  if (typeof updateNodeData === 'function') {
+    updateNodeData(id, { text: event.target.value });
+  }
+  }
+
 </script>
 
-<Handle type="target" position={Position.Top} />
 <div class="custom">
-  Custom Node
-  <div><strong>position: {~~positionAbsolute.x},{~~positionAbsolute.y}</strong></div>
+  <input value={node.data.label} on:input={handleInputLabel} /><br>
+  <textarea rows="5" value={node.data.text} on:input={handleInputText} />
 </div>
-
-<Handle type="source" position={Position.Bottom} id="a" style="transform: translate(10px, 50%); left: 0;" />
-<Handle type="source" position={Position.Bottom} id="b" style="transform: translate(0, 50%); left: auto; right: 10px" />
+<Handle type="target" position={Position.Top} />
+<Handle type="target" position={Position.Right} />
+<Handle type="target" position={Position.Left} />
+<Handle type="source" position={Position.Bottom}/>
 
 <style>
 .custom {

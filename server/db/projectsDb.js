@@ -134,23 +134,6 @@ export const findNotesByProjectId = async (projectId) => {
   }
 };
 
-/* export const findNoteByNoteName = async (projectId, noteName) => {
-  try {
-    const _id = new ObjectId(projectId);
-    const result = await db.projects.findOne(
-      { _id, "notes.noteName": noteName },
-      { "notes.$": 1 }
-    );
-      console.log(result)
-    return result ? result.notes : [];
-  } catch (err) {
-    console.error("Error occurred while finding notes by noteName", err);
-    // Handle the error gracefully, you can choose to return a specific value or rethrow the error
-    throw new Error("Failed to find note by note name");
-  }
-};
- */
-
 export const findNoteByNoteName = async (projectId, noteName) => {
   try {
     const _id = new ObjectId(projectId);
@@ -188,5 +171,23 @@ export const updateNoteByNoteName = async (projectId, noteName, updatedNoteData)
   } catch (err) {
     console.error("Error occurred while updating note by noteName", err);
     throw new Error("Failed to update note by note name");
+  }
+};
+
+export const updateDiagram = async (projectId, diagram) => {
+  try {
+
+    const _id = new ObjectId(projectId);
+
+    const result = await db.projects.updateOne(
+      { _id },
+      { $set: { diagram } }
+    );
+
+
+    return result;
+  } catch (err) {
+    console.error("Error occurred while updating diagram", err);
+    throw err;
   }
 };

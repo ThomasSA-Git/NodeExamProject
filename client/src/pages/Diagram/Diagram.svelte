@@ -1,117 +1,124 @@
 <script>
-  import { writable } from 'svelte/store';
+  import { writable } from "svelte/store";
   import {
     SvelteFlow,
     Controls,
     Background,
     MiniMap,
-    SvelteFlowProvider
-  } from '@xyflow/svelte';
+    SvelteFlowProvider,
+  } from "@xyflow/svelte";
+  import { onDestroy, onMount } from "svelte";
+  import "@xyflow/svelte/dist/style.css";
+  import CustomNode from "./CustomNode.svelte";
+  import { BASE_URL } from "../../store/global";
+  import { showToast } from "../../assets/js/toast";
+  import "../../assets/css/toast.css";
 
-  import { onDestroy } from "svelte"
+  let initialNodes = [];
 
-  import '@xyflow/svelte/dist/style.css'
+  let initialEdges = [];
 
-  import CustomNode from './CustomNode.svelte';
-  
+  const nodes = writable(initialNodes);
 
-
-  let intitialNodes = [
-    {
-      id: '1',
-      data: { label: 'Hello' },
-      position: { x: 0, y: 0 }
-    },
-    {
-      id: '2',
-      data: { label: 'World' },
-      position: { x: 0, y: 150 }
-    },
-    {
-      id: '3',
-      data: { label: 'World' },
-      position: { x: 250, y: 50 },
-      type: 'custom'
-    }
-  ];
-
-/*   let intitialEdges = [
-    {
-      id: '1-2',
-      source: '1',
-      target: '2',
-    },
-    {
-      id: '1-3',
-      source: '1',
-      target: '3',
-    },
-    {
-      id: '2-3',
-      source: '2',
-      target: '3',
-    }
-  ]; */
-
-  const nodes = writable(intitialNodes);
-
-  //const edges = writable(intitialEdges);
-  const edges = writable([
-    {
-      id: '1-2',
-      source: '1',
-      target: '2',
-    },
-    {
-      id: '1-3',
-      source: '1',
-      target: '3',
-    },
-    {
-      id: '2-3',
-      source: '2',
-      target: '3',
-    }
-  ]);
+  const edges = writable(initialEdges);
 
   let savedNodes = [];
-  
-  // Subscribe to changes in the nodes store
-  const unsubscribe = nodes.subscribe(updatedNodes => {
-    // Log the positions of the nodes
-    const updatedPositions = updatedNodes.map(node => {
-      console.log(`Node ${node.id} position: x=${node.position.x}, y=${node.position.y}`);
+  let savedEdges = [];
+  const unsubscribeNodes = nodes.subscribe((updatedNodes) => {
+    const updatedPositions = updatedNodes.map((node) => {
+      console.log(
+        `Node ${node.id} position: x=${node.position.x}, y=${node.position.y}`
+      );
       return node;
     });
 
-    // Update the savedNodes store with the latest positions
     savedNodes = updatedPositions;
     console.log(savedNodes[0]);
-    intitialNodes = savedNodes;
+    initialNodes = savedNodes;
+  });
+
+  const unsubscribeEdges = edges.subscribe((updatedEdges) => {
+    savedEdges = updatedEdges;
+    console.log(savedEdges[0]);
+    initialEdges = savedEdges;
   });
 
   const nodeTypes = {
-    custom: CustomNode
+    custom: CustomNode,
+  };
+
+  onMount(async () => {
+    try {
+      const response = await fetch($BASE_URL + "/diagram", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(data[0]);
+        initialNodes = data.nodes;
+        initialEdges = data.edges;
+        // Update the Svelte store with the fetched data
+        nodes.set(data.diagram.nodes);
+        edges.set(data.diagram.edges);
+      } else {
+        showToast(data.message, "error");
+      }
+    } catch (error) {
+      showToast(error, "error");
+    }
+  });
+
+  async function handleSave() {
+    try {
+      const diagram = {
+        nodes: initialNodes,
+        edges: initialEdges
+      };
+
+      const response = await fetch($BASE_URL + "/diagram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(diagram),
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (response.ok) {
+        showToast(result.message, "success");
+      } else {
+        showToast(result.message, "error");
+      }
+    } catch (error) {
+      showToast(error, "error");
+    }
   }
 
-  function handleLog(){
-    console.log(intitialNodes[5])
-    console.log(edges)
+  function handleLog() {
+    console.log(savedNodes[2]);
+    savedEdges.forEach((element) => {
+      console.log(element);
+    });
   }
 
-  function handleAddNode(){
+  function handleAddNode() {
     const newNode = {
-      id: (1 + intitialNodes.length).toString(),
-      data: { label: "New node" },
-      position: { x: 10, y: 0}
-    };
-    nodes.update(currentNodes => [...currentNodes, newNode]);
-  }
+    id: (initialNodes && initialNodes.length > 0 ? 1 + initialNodes.length : 1).toString(),
+    data: { label: "New node" },
+    position: { x: 10, y: 0 },
+    type: "custom",
+  };
+  nodes.update((currentNodes) => [...currentNodes, newNode]);
+}
 
-  onDestroy(() => unsubscribe());
+
+  onDestroy(() => {
+    unsubscribeNodes();
+    unsubscribeEdges();
+  });
 </script>
 
-<div style:height="100vh">
+<div style:height="80vh">
   <SvelteFlowProvider>
     <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
       <Controls />
@@ -123,3 +130,4 @@
 
 <button on:click={handleLog}>Log</button>
 <button on:click={handleAddNode}>Add node</button>
+<button on:click={handleSave}>Save diagram</button>

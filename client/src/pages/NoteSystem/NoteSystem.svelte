@@ -75,12 +75,13 @@
         body: JSON.stringify(updatedNote),
         credentials: "include",
       });
+      const result = await response.json();
       if (response.ok) {
-        const result = await response.json();
+     
         showToast(result.message, "success");
       } else {
-        const errorData = await response.json();
-        showToast(errorData.message, "error");
+  
+        showToast(result.message, "error");
       }
     } catch (error) {
       showToast(`Save failed. Error: ${error.message}`, "error");
