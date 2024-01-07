@@ -64,9 +64,6 @@ app.use("/auth", authRateLimiter);
 import userRouter from "./routers/userRouter.js";
 app.use(userRouter);
 
-import adminRouter from "./routers/adminRouter.js";
-app.use(adminRouter);
-
 import projectRouter from "./routers/projectRouter.js";
 app.use(projectRouter);
 
@@ -75,6 +72,9 @@ app.use(noteRouter);
 
 import diagramRouter from "./routers/diagramRouter.js";
 app.use(diagramRouter);
+
+import projectUserRouter from "./routers/projectUserRouter.js";
+app.use(projectUserRouter);
 
 import { sessionUser } from "./routers/authRouter.js";
 
@@ -91,6 +91,7 @@ const wrap = (middleware) => (socket, next) =>
       }
 
       session.user = { username }; // Set the user information to session
+      session.project = { projectId };
 
       // Validate the user information as needed
       if (sessionUser === username) {
@@ -105,36 +106,70 @@ const wrap = (middleware) => (socket, next) =>
   });
 io.use(wrap(sessionMiddleware));
 
-import { findProjectByProjectId, updateKanban } from "./db/projectsDb.js";
+import {
+  findProjectByProjectId,
+  updateKanban,
+  addUserToProject,
+  deleteUserFromProject,
+} from "./db/projectsDb.js";
+
+import { findUserByUsername } from "./db/usersDb.js";
+import { mapResponse } from "./dto/userResponse.js";
 
 import { purifyKanbanList } from "./util/DOMpurify.js";
 
-
 io.on("connection", (socket) => {
-  
   socket.on("save-kanban", async (data) => {
-
-
-    const purifiedKanban = data.kanban.map(purifyKanbanList); 
-    const result = await updateKanban(data.projectId, purifiedKanban);
-    if(result.acknowledged && result.matchedCount){
-      io.emit("save-success", { message: "Kanban saved successfully" })
-    }
-    else {
-      io.emit("save-failure", { message: "Kanban save failed" })
+    try {
+      const purifiedKanban = data.kanban.map(purifyKanbanList);
+      const result = await updateKanban(data.projectId, purifiedKanban);
+      if (result.acknowledged && result.matchedCount) {
+        io.emit("save-success", { message: "Kanban saved successfully" });
+      } else {
+        io.emit("save-failure", { message: "Kanban save failed" });
+      }
+    } catch (error) {
+      socket.emit({ message: `Error: ${error}` });
     }
   });
-    socket.on("load-kanban", async (data) => {
-      try {
-        const project = await findProjectByProjectId(data.projectId);
-        
-        io.emit("kanban-data", project.kanban);
-      } catch (error) {
-        console.error("Error loading kanban data", error);
-        // Handle the error, emit an error event or something
+  socket.on("load-kanban", async (data) => {
+    try {
+      const project = await findProjectByProjectId(data.projectId);
+
+      io.emit("kanban-data", project.kanban);
+    } catch (error) {
+      socket.emit({ message: `Error: ${error}` });
+    }
+  });
+
+  socket.on("search-user", async (data) => {
+    try {
+      const userExists = await findUserByUsername(data.username);
+
+      if (userExists === null) {
+        io.emit("find-user-result", { message: "User not found" });
+      } else {
+        io.emit("find-user-error", { username: user.username });
       }
-    });
-  
+    } catch (error) {
+      io.emit("find-user-result", { message: `Error: ${error}` });
+    }
+  });
+
+  socket.on("add-user", async (data) => {
+    try {
+      const result = await addUserToProject( data.projectId, data.username );
+      console.log(data)
+      console.log(data.username)
+      if (result.modifiedCount === 1) {
+        io.emit("add-user-success", { message: "User added" });
+      } else {
+        io.emit("add-user-error", { message: "User not added. Error while saving." });
+      }
+    } catch (error) {
+      io.emit("add-user-error", { message: `Error: ${error}` });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 8080;

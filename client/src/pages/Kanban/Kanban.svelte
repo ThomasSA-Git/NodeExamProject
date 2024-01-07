@@ -166,7 +166,6 @@
 
   socket.on("connect_error", (error) => {
   if (error.message === "Unauthorized") {
-    // Handle unauthorized connection, redirect to login or show an error message
     showToast(error.message , "error");
   }
 });

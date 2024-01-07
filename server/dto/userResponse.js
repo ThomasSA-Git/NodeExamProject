@@ -1,5 +1,5 @@
 export function mapResponse(users) {
-  const usersDTO = users.map((user) => createUserResponse(user));
+  const usersDTO = users.map((user) => user.username);
   return usersDTO;
 }
 

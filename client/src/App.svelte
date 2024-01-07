@@ -18,7 +18,6 @@
 
   import { onMount } from "svelte";
 
-
   onMount(() => {
     // Check for user in localStorage
     const storedUser = localStorage.getItem("user");
@@ -49,9 +48,6 @@
 
     <Link to="/userpage">User start</Link>
 
-    <Link to="/diagram">Diagram</Link>
-
-
     {#if $user != null && $role == "admin"}
       <Link to="/adminpage">Admin</Link>
     {/if}
@@ -71,13 +67,19 @@
 
     <PrivateRoute path="/project" let:location><Project /></PrivateRoute>
     <PrivateRoute path="/kanban" let:location><Kanban /></PrivateRoute>
-    <PrivateRoute path="/noteOverview" let:location><NoteOverview /></PrivateRoute>
+    <PrivateRoute path="/noteOverview" let:location
+      ><NoteOverview /></PrivateRoute
+    >
+    <PrivateRoute path="/diagram" let:location>
+      <Diagram />
+    </PrivateRoute>
+    <PrivateRoute path="/notes" let:location>
+      <NoteSystem />
+    </PrivateRoute>
     <PrivateRoute path="/userpage" let:location>
       <User />
     </PrivateRoute>
-    <PrivateRoute path="/adminpage" let:location>
-      <Admin />
-    </PrivateRoute>
+
   </div>
 </Router>
 

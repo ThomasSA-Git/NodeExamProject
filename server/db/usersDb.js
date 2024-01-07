@@ -10,7 +10,6 @@ export const createUser = async (username, email, password) => {
     };
 
     const result = await db.users.insertOne(user);
-    console.log("User created successfully");
     return result;
   } catch (err) {
     console.error("Error occurred while creating user", err);
@@ -25,7 +24,6 @@ export const addProjectIdToUser = async (username, projectId) => {
       { username: username },
       { $addToSet: { projects: projectId } }
     );
-    console.log("Project created successfully");
     return result;
   } catch (err) {
     console.error("Error occurred while adding project", err);
@@ -39,8 +37,6 @@ export const removeProjectIdFromUser = async (username, projectId) => {
       { username: username },
       { $pull: { projects: projectId } }
     );
-
-    console.log(`Project ${projectId} removed successfully`);
     return result;
   } catch (err) {
     console.error(`Error occurred while removing project ${projectId}`, err);
@@ -68,23 +64,6 @@ export const findAllUsers = async () => {
   }
 };
 
-export const createAdminUser = async (password) => {
-  try {
-    const user = {
-      username: "admin",
-      email: "admin@admin",
-      password: password,
-      role: "admin",
-    };
-
-    const result = await db.users.insertOne(user);
-    console.log("Admin user created successfully");
-    return result;
-  } catch (err) {
-    console.error("Error occurred while creating admin user", err);
-    throw err;
-  }
-};
 
 export const updateUserPassword = async (username, newPassword) => {
   try {
@@ -104,12 +83,4 @@ export const updateUserPassword = async (username, newPassword) => {
     console.error("Error occurred while updating user password", err);
     throw err;
   }
-};
-
-export default {
-  findAllUsers,
-  findUserByUsername,
-  updateUserPassword,
-  createAdminUser,
-  createUser,
 };

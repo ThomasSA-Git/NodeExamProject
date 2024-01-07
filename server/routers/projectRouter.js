@@ -37,21 +37,17 @@ router.get("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   }
 });
 
-router.get(
-  "/api/projects",
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const username = req.session.user.username;
-      const projects = await findProjectsByUser(username);
-      const projectsWithDates = projects.map(convertTimestampToDate);
-      res.send({ data: projectsWithDates });
-    } catch (error) {
-      console.error("Error in getting project", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
+router.get("/api/projects", isAuthenticated, async (req, res) => {
+  try {
+    const username = req.session.user.username;
+    const projects = await findProjectsByUser(username);
+    const projectsWithDates = projects.map(convertTimestampToDate);
+    res.send({ data: projectsWithDates });
+  } catch (error) {
+    console.error("Error in getting project", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-);
+});
 
 router.post("/api/projects", isAuthenticated, async (req, res) => {
   try {
@@ -64,7 +60,7 @@ router.post("/api/projects", isAuthenticated, async (req, res) => {
 
     await addProjectIdToUser(purifiedUsername, project.insertedId);
 
-    res.status(201).json({ message: "Project created successfully" });
+    res.status(201).send({ message: "Project created successfully" });
   } catch (error) {
     console.error("Error in creating project", error);
     res.status(500).json({ error: "Internal server error" });
@@ -79,7 +75,7 @@ router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
 
     await removeProjectIdFromUser(projectId);
 
-    res.json({ message: `Project '${projectId}' deleted successfully.` });
+    res.status(201).send({ message: `Project '${projectId}' deleted successfully.` });
   } catch (error) {
     console.error("Error in delete project", error);
     res.status(500).json({ error: "Internal server error" });

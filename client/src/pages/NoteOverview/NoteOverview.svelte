@@ -129,11 +129,9 @@
   }
 </script>
 
-<!-- <form on:submit={handleCreateNewNote}> -->
   <label for="newNoteName">New note name</label>
   <input type="text" bind:value={newNoteName} required />
-  <button on:click={handleCreateNewNote}>Save</button>
-<!-- </form> -->
+  <button on:click={handleCreateNewNote}>Create</button>
 
 <hr />
 

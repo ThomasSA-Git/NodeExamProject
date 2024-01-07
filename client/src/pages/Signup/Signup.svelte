@@ -28,7 +28,7 @@
       if (response.ok) {
         const registrationMessage = await response.json();
 
-        showToast(registrationMessage.message, "succes");
+        showToast(registrationMessage.message, "success");
 
         username = "";
         email = "";

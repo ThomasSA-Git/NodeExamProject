@@ -19,7 +19,6 @@ function isAuthenticated(req, res, next) {
   }
 }
 
-// maybe use session instead of path variable..?
 router.get("/api/members", isAuthenticated, async (req, res) => {
   try {
     // finduser in db
@@ -34,7 +33,6 @@ router.get("/api/members", isAuthenticated, async (req, res) => {
       res.status(404).json({ error: "User not found" });
     }
   } catch (error) {
-    console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

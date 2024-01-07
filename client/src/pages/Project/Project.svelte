@@ -1,15 +1,27 @@
 <script>
   import { onMount } from "svelte";
   import { BASE_URL } from "../../store/global";
+  import { user } from "../../store/stores";
   import { currentProjectName, currentProjectId } from "../../store/project";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
   import { showToast } from "../../assets/js/toast";
   import * as d3 from "d3";
+  import { IO_URL } from "../../store/global";
+  import io from "socket.io-client";
+
+  const socket = io($IO_URL, {
+  query: {
+    projectId: $currentProjectId,
+    username: $user,
+  },
+});
 
   let kanban = [];
   let users = [];
-
+  let usersToAdd = [];
+  let searchUser;
+  let userFound = false;
 
   onMount(async () => {
     try {
@@ -24,13 +36,53 @@
         const result = await response.json();
         kanban = result.projectData.kanban;
         users = result.users;
+        getUsersToAdd();
+        console.log(usersToAdd)
       } else {
         showToast("Could not load project", "error");
       }
-    } catch (error) {}
-  });
+    } catch (error) {
+      showToast("Error occured. Could not show project", "error");
+    }
+  },
+  );
 
-  // chart logic
+  function handleSearchUser(){
+  socket.emit("search-user", {searchUser})
+  socket.on("find-user-result", (data) => {
+    userFound = true;
+  })
+  socket.on("find-user-error", (data) => {
+   
+})
+}  
+
+function handleAddUser(){
+  console.log(searchUser)
+  socket.emit("add-user", { username: searchUser, projectId: $currentProjectId })
+  socket.on("add-user-result", (data) => {
+    searchUser = "";
+  })
+  socket.on("add-user-error", (data) => {
+    showToast(data.message, "error");
+})
+}
+
+  async function getUsersToAdd() {
+    try {
+      const response = await fetch($BASE_URL + "/projectUsers", {
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (response.ok) {
+        usersToAdd = result.usersToAdd;
+      }
+    } catch (error) {
+
+    }
+  }
+
+  // chart logic -----------------------------
   const formatLabel = d3.format(",.0f");
 
   const margin = {
@@ -113,32 +165,34 @@
     <h3>Kanban, diagram and notes</h3>
     <div></div>
     <div class="button-row">
-   
-        <button
-          class="navigate-button"
-          on:click={() => handleNavigate("/kanban")}>Kanban board</button
-        >
+      <button class="navigate-button" on:click={() => handleNavigate("/kanban")}
+        >Kanban board</button
+      >
 
-   
-        <button class="navigate-button" on:click={() => handleNavigate("/")}
-          >Diagram creator</button
-        >
+      <button
+        class="navigate-button"
+        on:click={() => handleNavigate("/diagram")}>Diagram creator</button
+      >
 
+      <button
+        class="navigate-button"
+        on:click={() => handleNavigate("/noteOverview")}>Project notes</button
+      >
 
- 
-        <button class="navigate-button" on:click={() => handleNavigate("/noteOverview")}
-          >Project notes</button
-        >
-   
-        <button
-          class="navigate-button"
-          on:click={() => handleNavigate("/userpage")}>User overview</button
-        >
+      <button
+        class="navigate-button"
+        on:click={() => handleNavigate("/userpage")}>User overview</button
+      >
     </div>
   </div>
 </div>
 <div class="row">
-  <div class="container"><h3>Add users and list of users</h3></div>
+  <div class="container"><h3>Add users and list of users</h3>
+  <input type="text" on:change={handleSearchUser} bind:value={searchUser}>
+  {#if userFound}
+  <button on:click={handleAddUser}>Add user</button>
+  {/if}
+  </div>
 
   <div class="container"><h3>Next deadline for project and task name</h3></div>
 </div>

@@ -13,6 +13,7 @@
   import { BASE_URL } from "../../store/global";
   import { showToast } from "../../assets/js/toast";
   import "../../assets/css/toast.css";
+  import { navigate } from "svelte-navigator";
 
   let initialNodes = [];
 
@@ -72,7 +73,7 @@
     try {
       const diagram = {
         nodes: initialNodes,
-        edges: initialEdges
+        edges: initialEdges,
       };
 
       const response = await fetch($BASE_URL + "/diagram", {
@@ -94,23 +95,18 @@
     }
   }
 
-  function handleLog() {
-    console.log(savedNodes[2]);
-    savedEdges.forEach((element) => {
-      console.log(element);
-    });
-  }
-
   function handleAddNode() {
     const newNode = {
-    id: (initialNodes && initialNodes.length > 0 ? 1 + initialNodes.length : 1).toString(),
-    data: { label: "New node" },
-    position: { x: 10, y: 0 },
-    type: "custom",
-  };
-  nodes.update((currentNodes) => [...currentNodes, newNode]);
-}
-
+      id: (initialNodes && initialNodes.length > 0
+        ? 1 + initialNodes.length
+        : 1
+      ).toString(),
+      data: { label: "New node" },
+      position: { x: 10, y: 0 },
+      type: "custom",
+    };
+    nodes.update((currentNodes) => [...currentNodes, newNode]);
+  }
 
   onDestroy(() => {
     unsubscribeNodes();
@@ -128,6 +124,6 @@
   </SvelteFlowProvider>
 </div>
 
-<button on:click={handleLog}>Log</button>
 <button on:click={handleAddNode}>Add node</button>
 <button on:click={handleSave}>Save diagram</button>
+<button class="navigate-button" on:click={() => navigate("/project")}>Back to project</button>

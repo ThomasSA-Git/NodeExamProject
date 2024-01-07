@@ -30,7 +30,7 @@
         $user = userData.username;
         $role = userData.role;
         localStorage.setItem("user", JSON.stringify(userData));
-        showToast("Login successful. Redirecting to member page.", "success");
+        showToast("Login successful. Redirecting to user page.", "success");
 
         // Redirect depending on role
         setTimeout(() => {
