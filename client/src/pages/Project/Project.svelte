@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { BASE_URL } from "../../store/global";
   import { user } from "../../store/stores";
   import { currentProjectName, currentProjectId } from "../../store/project";
@@ -49,7 +49,7 @@
 
   function handleSearchUser(){
   socket.emit("search-user", {searchUser})
-  socket.on("find-user-result", (data) => {
+  socket.on("find-user-result", () => {
     userFound = true;
   })
   socket.on("find-user-error", (data) => {
@@ -67,6 +67,11 @@ function handleAddUser(){
     showToast(data.message, "error");
 })
 }
+
+onDestroy(() => {
+    // Leave the room based on currentProjectId
+    socket.emit("leave-room", { projectId: $currentProjectId });
+  });
 
   async function getUsersToAdd() {
     try {

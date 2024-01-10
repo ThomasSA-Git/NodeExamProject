@@ -5,11 +5,12 @@
     Controls,
     Background,
     MiniMap,
-    SvelteFlowProvider,
+    SvelteFlowProvider
   } from "@xyflow/svelte";
   import { onDestroy, onMount } from "svelte";
   import "@xyflow/svelte/dist/style.css";
   import CustomNode from "./CustomNode.svelte";
+  import Sidebar from "./Sidebar.svelte";
   import { BASE_URL } from "../../store/global";
   import { showToast } from "../../assets/js/toast";
   import "../../assets/css/toast.css";
@@ -96,16 +97,30 @@
   }
 
   function handleAddNode() {
+    const numericIds = initialNodes.map((node) => parseInt(node.id, 10));
+    const highestId = Math.max(...numericIds);
     const newNode = {
-      id: (initialNodes && initialNodes.length > 0
-        ? 1 + initialNodes.length
-        : 1
-      ).toString(),
-      data: { label: "New node" },
+      id: (highestId + 1).toString(),
+      data: { label: "New node", text: "" },
       position: { x: 10, y: 0 },
       type: "custom",
     };
     nodes.update((currentNodes) => [...currentNodes, newNode]);
+  }
+
+  function handleDeleteNode(nodeId) {
+    // remove the node with the given ID from the list of nodes
+    initialNodes = initialNodes.filter((node) => node.id !== nodeId);
+    nodes.set(initialNodes);
+    // remove any edges associated with the deleted node
+    initialEdges = initialEdges.filter(
+      (edge) => edge.source !== nodeId && edge.target !== nodeId
+    );
+    edges.set(initialEdges);
+  }
+
+  function handleUpdate(){
+    nodes.set(initialNodes);
   }
 
   onDestroy(() => {
@@ -114,16 +129,47 @@
   });
 </script>
 
-<div style:height="80vh">
-  <SvelteFlowProvider>
-    <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
-      <Controls />
-      <Background />
-      <MiniMap />
-    </SvelteFlow>
-  </SvelteFlowProvider>
+<div class="container">
+  <div class="flow">
+    <div class="svelte-flow-container">
+      <SvelteFlowProvider>
+        <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
+          <Controls />
+          <Background />
+          <MiniMap />
+        </SvelteFlow>
+      </SvelteFlowProvider>
+    </div>
+    <Sidebar {initialNodes} {handleDeleteNode} />
+  </div>
+
+  <div class="buttons">
+    <button on:click={handleAddNode}>Add node</button>
+    <button on:click={handleSave}>Save diagram</button>
+    <button class="navigate-button" on:click={() => navigate("/project")}
+      >Back to project</button
+    >
+  </div>
 </div>
 
-<button on:click={handleAddNode}>Add node</button>
-<button on:click={handleSave}>Save diagram</button>
-<button class="navigate-button" on:click={() => navigate("/project")}>Back to project</button>
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .flow {
+    flex: 1;
+    display: flex;
+  }
+
+  .svelte-flow-container {
+    height: 75vh;
+    width: 88%; /* Adjust this as needed */
+  }
+
+  .buttons {
+    margin-top: 1rem;
+  }
+</style>

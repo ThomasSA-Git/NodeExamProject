@@ -243,7 +243,7 @@
                 on:dragstart={(event) => dragStart(event, listIndex, taskIndex)}
               >
                 <strong>{task.name}</strong>
-                <!-- Edit button for task -->
+                <!-- edit button for task -->
                 <button
                   class="edit-button"
                   on:click={() => openUpdateModal(listIndex, taskIndex, task)}
@@ -254,7 +254,7 @@
                     class="edit-image"
                   />
                 </button>
-                <!-- Delete button for task -->
+                <!-- delete button for task -->
                 <button
                   class="delete-button"
                   on:click={() => deleteTask(listIndex, taskIndex)}

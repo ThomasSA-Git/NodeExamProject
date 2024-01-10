@@ -73,9 +73,6 @@ app.use(noteRouter);
 import diagramRouter from "./routers/diagramRouter.js";
 app.use(diagramRouter);
 
-import projectUserRouter from "./routers/projectUserRouter.js";
-app.use(projectUserRouter);
-
 import {
   findProjectByProjectId,
   updateKanban,
@@ -89,6 +86,7 @@ import { mapResponse } from "./dto/userResponse.js";
 import { purifyKanbanList } from "./util/DOMpurify.js";
 
 io.on("connection", (socket) => {
+  // client joins room identified by projectId when connecting. Used for live update of kanban
   socket.join(socket.projectId);
   socket.on("save-kanban", async (data) => {
     try {
@@ -96,18 +94,15 @@ io.on("connection", (socket) => {
       const result = await updateKanban(data.projectId, purifiedKanban);
 
       if (result.acknowledged && result.matchedCount) {
-        // Emit the updated Kanban data to all clients in the same room
+        // Emit the updated kanban to all clients in the same room
         const updatedProject = await findProjectByProjectId(data.projectId);
         io.to(socket.projectId).emit("kanban-data", updatedProject.kanban);
 
-        // Broadcast save-success to the specific socket
         socket.emit("save-success", { message: "Kanban updated" });
       } else {
-        // Broadcast save-failure to the specific socket
         socket.emit("save-failure", { message: "Kanban update failed" });
       }
     } catch (error) {
-      // Emit the error to the specific socket
       socket.emit("save-failure", { message: `Error: ${error}` });
     }
   });
