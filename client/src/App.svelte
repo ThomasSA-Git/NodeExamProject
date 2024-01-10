@@ -4,7 +4,6 @@
   import Login from "./pages/Login/Login.svelte";
   import Signup from "./pages/Signup/Signup.svelte";
   import User from "./pages/UserPage/UserPage.svelte";
-  import Admin from "./pages/Admin/Admin.svelte";
   import PrivateRoute from "./components/RouteProtection/PrivateRoute.svelte";
   import ResetPassword from "./pages/ResetPassword/ResetPassword.svelte";
   import Kanban from "./pages/Kanban/Kanban.svelte";
@@ -47,10 +46,6 @@
     {/if}
 
     <Link to="/userpage">User start</Link>
-
-    {#if $user != null && $role == "admin"}
-      <Link to="/adminpage">Admin</Link>
-    {/if}
 
     {#if $user != null}
       <h3>Welcome {$user}</h3>

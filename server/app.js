@@ -76,36 +76,6 @@ app.use(diagramRouter);
 import projectUserRouter from "./routers/projectUserRouter.js";
 app.use(projectUserRouter);
 
-import { sessionUser } from "./routers/authRouter.js";
-
-const wrap = (middleware) => (socket, next) =>
-  middleware(socket.request, {}, async (err) => {
-    const { projectId, username } = socket.handshake.query;
-
-    try {
-      // Access the session through the express-session API
-      const session = socket.request.session;
-
-      if (!session) {
-        throw new Error("Session not available");
-      }
-
-      session.user = { username }; // Set the user information to session
-      session.project = { projectId };
-
-      // Validate the user information as needed
-      if (sessionUser === username) {
-        return next();
-      } else {
-        return next(new Error("Unauthorized"));
-      }
-    } catch (error) {
-      console.error("Error setting user in session:", error);
-      return next(new Error("Unauthorized"));
-    }
-  });
-io.use(wrap(sessionMiddleware));
-
 import {
   findProjectByProjectId,
   updateKanban,
@@ -119,17 +89,26 @@ import { mapResponse } from "./dto/userResponse.js";
 import { purifyKanbanList } from "./util/DOMpurify.js";
 
 io.on("connection", (socket) => {
+  socket.join(socket.projectId);
   socket.on("save-kanban", async (data) => {
     try {
       const purifiedKanban = data.kanban.map(purifyKanbanList);
       const result = await updateKanban(data.projectId, purifiedKanban);
+
       if (result.acknowledged && result.matchedCount) {
-        io.emit("save-success", { message: "Kanban saved successfully" });
+        // Emit the updated Kanban data to all clients in the same room
+        const updatedProject = await findProjectByProjectId(data.projectId);
+        io.to(socket.projectId).emit("kanban-data", updatedProject.kanban);
+
+        // Broadcast save-success to the specific socket
+        socket.emit("save-success", { message: "Kanban updated" });
       } else {
-        io.emit("save-failure", { message: "Kanban save failed" });
+        // Broadcast save-failure to the specific socket
+        socket.emit("save-failure", { message: "Kanban update failed" });
       }
     } catch (error) {
-      socket.emit({ message: `Error: ${error}` });
+      // Emit the error to the specific socket
+      socket.emit("save-failure", { message: `Error: ${error}` });
     }
   });
   socket.on("load-kanban", async (data) => {
@@ -158,17 +137,24 @@ io.on("connection", (socket) => {
 
   socket.on("add-user", async (data) => {
     try {
-      const result = await addUserToProject( data.projectId, data.username );
-      console.log(data)
-      console.log(data.username)
+      const result = await addUserToProject(data.projectId, data.username);
       if (result.modifiedCount === 1) {
         io.emit("add-user-success", { message: "User added" });
       } else {
-        io.emit("add-user-error", { message: "User not added. Error while saving." });
+        io.emit("add-user-error", {
+          message: "User not added. Error while saving.",
+        });
       }
     } catch (error) {
       io.emit("add-user-error", { message: `Error: ${error}` });
     }
+  });
+
+  socket.on("disconnect", () => {
+    // Leave the room based on projectId
+    socket.rooms.forEach((room) => {
+      socket.leave(room);
+    });
   });
 });
 

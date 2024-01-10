@@ -8,19 +8,18 @@
   import UpdateTaskModal from "../../assets/modal/UpdateTaskModal.svelte";
   import { IO_URL } from "../../store/global";
   import io from "socket.io-client";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { currentProjectId, currentProjectName } from "../../store/project";
   import { user } from "../../store/stores";
   import { showToast } from "../../assets/js/toast.js";
   import { navigate } from "svelte-navigator";
 
   const socket = io($IO_URL, {
-  query: {
-    projectId: $currentProjectId,
-    username: $user,
-  },
-});
-
+    query: {
+      projectId: $currentProjectId,
+      username: $user,
+    },
+  });
 
   let kanban = [
     {
@@ -60,7 +59,7 @@
     event.preventDefault();
     const json = event.dataTransfer.getData("text/plain");
     const data = JSON.parse(json);
-    
+
     const [task] = kanban[data.listIndex].tasks.splice(data.taskIndex, 1);
 
     kanban[listIndex].tasks.push(task);
@@ -135,16 +134,21 @@
     kanban = [...kanban];
   }
 
-  onMount(async () => {
+  onMount(loadKanban);
+
+  function loadKanban() {
     try {
-      socket.emit("load-kanban", { projectId: $currentProjectId, username: $user });
+      socket.emit("load-kanban", {
+        projectId: $currentProjectId,
+        username: $user,
+      });
 
       socket.on("kanban-data", (data) => {
         console.log(data);
         if (data && Array.isArray(data)) {
-          if(data.length > 0){
-          kanban = data;
-        }
+          if (data.length > 0) {
+            kanban = data;
+          }
         }
       });
     } catch (error) {
@@ -152,29 +156,23 @@
     }
 
     // Clean up the interval when the component is unmounted
+  }
+
+  onDestroy(() => {
+    // Leave the room based on currentProjectId
+    socket.emit("leave-room", { projectId: $currentProjectId });
   });
 
-  function startUpdateInterval() {
-    // Clear the existing interval (if any)
-    clearInterval(updateInterval);
-
-    // Set a new interval
-    updateInterval = setInterval(() => {
-      handleSaveKanban();
-    }, 120000);
-  }
-
-  socket.on("connect_error", (error) => {
-  if (error.message === "Unauthorized") {
-    showToast(error.message , "error");
-  }
-});
-
   function handleSaveKanban() {
-    socket.emit("save-kanban", { kanban, projectId: $currentProjectId, username: $user });
+    socket.emit("save-kanban", {
+      kanban,
+      projectId: $currentProjectId,
+      username: $user,
+    });
     socket.on("save-success", (data) => {
       showToast(data.message, "success");
-      startUpdateInterval();
+      //loadKanban()
+      console.log(data)
     });
     socket.on("save-failure", (data) => {
       showToast(data.message, "error");
@@ -194,7 +192,9 @@
   <button class="btn-container-btn" on:click={handleSaveKanban}
     >Save kanban</button
   >
-  <button class="navigate-button" on:click={() => handleNavigate("/project")}>Project overview</button>
+  <button class="navigate-button" on:click={() => handleNavigate("/project")}
+    >Project overview</button
+  >
 </div>
 
 {#if isModalOpen}
@@ -209,67 +209,67 @@
   />
 {/if}
 <div class="kan-container">
-<div style="display: flex; gap: 20px; overflow-x: auto;">
-  {#each kanban as list, listIndex (list)}
-    <div animate:flip class="kan-col">
-      <input
-        style="font: bold 16px Arial, sans-serif; max-width: 180px"
-        bind:value={list.name}
-        placeholder={list.name}
-        on:keydown={handleEditListName(listIndex, list.name)}
-      />
-
-      <button class="delete-button" on:click={() => deleteList(listIndex)}>
-        <img
-          src="../../public/delete-icon.jpg"
-          alt="Delete List"
-          class="delete-image"
+  <div style="display: flex; gap: 20px; overflow-x: auto;">
+    {#each kanban as list, listIndex (list)}
+      <div animate:flip class="kan-col">
+        <input
+          style="font: bold 16px Arial, sans-serif; max-width: 180px"
+          bind:value={list.name}
+          placeholder={list.name}
+          on:keydown={handleEditListName(listIndex, list.name)}
         />
-      </button>
-      <hr />
-      <ul
-        class:hovering={hoveringOverList === list.name}
-        on:dragenter={() => (hoveringOverList = list.name)}
-        on:dragleave={() => (hoveringOverList = null)}
-        on:drop={(event) => drop(event, listIndex)}
-        ondragover="return false"
-        style="list-style-type: none; padding: 0; height: 420px; overflow-y: auto;"
-      >
-        {#each list.tasks as task, taskIndex (task)}
-          <div class="task" animate:flip>
-            <li
-              class="task-content"
-              draggable={true}
-              on:dragstart={(event) => dragStart(event, listIndex, taskIndex)}
-            >
-              <strong>{task.name}</strong>
-              <!-- Edit button for task -->
-              <button
-                class="edit-button"
-                on:click={() => openUpdateModal(listIndex, taskIndex, task)}
+
+        <button class="delete-button" on:click={() => deleteList(listIndex)}>
+          <img
+            src="../../public/delete-icon.jpg"
+            alt="Delete List"
+            class="delete-image"
+          />
+        </button>
+        <hr />
+        <ul
+          class:hovering={hoveringOverList === list.name}
+          on:dragenter={() => (hoveringOverList = list.name)}
+          on:dragleave={() => (hoveringOverList = null)}
+          on:drop={(event) => drop(event, listIndex)}
+          ondragover="return false"
+          style="list-style-type: none; padding: 0; height: 420px; overflow-y: auto;"
+        >
+          {#each list.tasks as task, taskIndex (task)}
+            <div class="task" animate:flip>
+              <li
+                class="task-content"
+                draggable={true}
+                on:dragstart={(event) => dragStart(event, listIndex, taskIndex)}
               >
-                <img
-                  src="../../public/edit-icon.png"
-                  alt="Edit Task"
-                  class="edit-image"
-                />
-              </button>
-              <!-- Delete button for task -->
-              <button
-                class="delete-button"
-                on:click={() => deleteTask(listIndex, taskIndex)}
-              >
-                <img
-                  src="../../public/delete-icon.jpg"
-                  alt="Delete Task"
-                  class="delete-image"
-                />
-              </button>
-            </li>
-          </div>
-        {/each}
-      </ul>
-    </div>
-  {/each}
-</div>
+                <strong>{task.name}</strong>
+                <!-- Edit button for task -->
+                <button
+                  class="edit-button"
+                  on:click={() => openUpdateModal(listIndex, taskIndex, task)}
+                >
+                  <img
+                    src="../../public/edit-icon.png"
+                    alt="Edit Task"
+                    class="edit-image"
+                  />
+                </button>
+                <!-- Delete button for task -->
+                <button
+                  class="delete-button"
+                  on:click={() => deleteTask(listIndex, taskIndex)}
+                >
+                  <img
+                    src="../../public/delete-icon.jpg"
+                    alt="Delete Task"
+                    class="delete-image"
+                  />
+                </button>
+              </li>
+            </div>
+          {/each}
+        </ul>
+      </div>
+    {/each}
+  </div>
 </div>
