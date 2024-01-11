@@ -2,7 +2,11 @@
   import { onMount, onDestroy } from "svelte";
   import { BASE_URL } from "../../store/global";
   import { user } from "../../store/stores";
-  import { currentProjectName, currentProjectId, projectUsers } from "../../store/project";
+  import {
+    currentProjectName,
+    currentProjectId,
+    projectUsers,
+  } from "../../store/project";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
   import "../../assets/css/project.css";
@@ -50,6 +54,31 @@
     }
   });
 
+  async function handleDeleteProject() {
+    try {
+      const response = await fetch(
+        $BASE_URL + `/projects/${$currentProjectId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+      const result = await response.json();
+      if(response.ok){
+        showToast(result.message, "success");
+
+        setTimeout(() => {
+          navigate("/userpage")
+        }, 3000);
+      }
+      else{
+        showToast(result.message, "error");
+      }
+    } catch (error) {
+      showToast("Error occured. Could not delete project", "error");
+    }
+  }
+
   function handleSearchUser() {
     if (!users.includes(searchUser)) {
       socket.emit("search-user", { searchUser });
@@ -89,7 +118,7 @@
     });
     socket.on("remove-user-success", (data) => {
       showToast(data.message, "success");
-      users = users.filter(user => user !== username);
+      users = users.filter((user) => user !== username);
     });
     socket.on("remove-user-error", (data) => {
       showToast(data.message, "error");
@@ -155,6 +184,10 @@
   <button class="navigate-button" on:click={() => handleNavigate("/userpage")}
     >User overview</button
   >
+
+  <button class="delete-btn" style="margin-left:150px" on:click={handleDeleteProject}
+    >Delete project</button
+  >
 </div>
 <hr />
 
@@ -201,7 +234,7 @@
 
   <div class="container">
     <h2>Add users and list of users</h2>
-    
+
     <div class="add-user">
       <h3>Search user to add:</h3>
       <input type="text" on:change={handleSearchUser} bind:value={searchUser} />
@@ -214,15 +247,14 @@
       <th>Username:</th>
       {#each users as user}
         <tr>
-          <td width="200px">{user}</td>
+          <td width="300px">{user}</td>
           <td
-            ><button class="delete-btn" on:click={() => handleRemoveUser(user)}>Remove</button
+            ><button class="delete-btn" on:click={() => handleRemoveUser(user)}
+              >Remove</button
             ></td
           >
         </tr>
       {/each}
     </div>
-
-  
   </div>
 </div>

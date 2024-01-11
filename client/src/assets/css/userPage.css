@@ -24,3 +24,6 @@ table {
   tr.item:hover {
     background-color: lightgray;
   }
+  p {
+    text-align: center;
+  }

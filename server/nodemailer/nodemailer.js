@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 
-export async function sendFakeEmail(userEmail, subject, message) {
+export async function sendEmail(userEmail, subject, message) {
     // Create a test account using ehereal
     const testAccount = await nodemailer.createTestAccount();
   
@@ -18,7 +18,7 @@ export async function sendFakeEmail(userEmail, subject, message) {
   
     // Setup email data
     const mailOptions = {
-      from: 'my_service_mail_for_exam@gmail.com',
+      from: 'my_service_mail_for_project_manager@gmail.com',
       to: userEmail,
       subject: subject,
       text: message

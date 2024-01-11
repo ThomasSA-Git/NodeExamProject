@@ -196,6 +196,28 @@ export const updateNoteByNoteName = async (
   }
 };
 
+export const deleteNoteByNoteName = async (projectId, noteName) => {
+  try {
+    const _id = new ObjectId(projectId);
+
+    // Update the project by pulling the note with the specified name
+    const result = await db.projects.updateOne(
+      { _id },
+      { $pull: { notes: { noteName } } }
+    );
+
+    if (result.modifiedCount === 1) {
+      console.log(`Note '${noteName}' deleted successfully.`);
+    } else {
+      console.log(`Note '${noteName}' not found or not deleted.`);
+    }
+  } catch (err) {
+    console.error("Error occurred while deleting note by noteName", err);
+    // Handle the error gracefully, you can choose to return a specific value or rethrow the error
+    throw new Error("Failed to delete note by note name");
+  }
+};
+
 export const updateDiagram = async (projectId, diagram) => {
   try {
     const _id = new ObjectId(projectId);

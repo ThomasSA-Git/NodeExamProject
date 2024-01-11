@@ -38,17 +38,17 @@
 <Router>
   <nav>
     <Link to="/">Home</Link>
+    {#if $user != null}
+    <Link to="/userpage">User start</Link>
+  {/if}
 
     {#if $user == null}
       <Link to="/login">Login</Link><br />
       <Link to="/signup">Signup</Link><br />
     {/if}
 
-    <Link to="/userpage">User start</Link>
-
     {#if $user != null}
-      <h3>Welcome {$user}</h3>
-      <button on:click={handleLogout} class="logout-button">Logout</button>
+      <button on:click={handleLogout} class="delete-btn">Logout</button>
     {/if}
   </nav>
   <div>
@@ -71,12 +71,10 @@
     <PrivateRoute path="/userpage" let:location>
       <User />
     </PrivateRoute>
-
   </div>
 </Router>
 
 <style>
-  /* Define your red color */
   .logout-button {
     color: white;
     background-color: red;

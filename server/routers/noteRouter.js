@@ -7,6 +7,7 @@ import {
   findNotesByProjectId,
   findNoteByNoteName,
   updateNoteByNoteName,
+  deleteNoteByNoteName
 } from "../db/projectsDb.js";
 
 function isAuthenticated(req, res, next) {
@@ -53,17 +54,17 @@ router.get("/api/notes/:noteName", isAuthenticated, async (req, res) => {
     const result = await findNoteByNoteName(projectId, noteName);
 
     if (result.length > 0) {
-      res.status(200).json(result);
+      res.status(200).send(result);
     } else {
-      res.status(404).json({ message: "Note not found" });
+      res.status(404).send({ message: "Note not found" });
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).send({ message: "Internal Server Error" });
   }
 });
 
-router.patch("/api/notes/:noteName", async (req, res) => {
+router.patch("/api/notes/:noteName", isAuthenticated, async (req, res) => {
   try {
     const updatedNote = req.body;
     await updateNoteByNoteName(
@@ -71,10 +72,20 @@ router.patch("/api/notes/:noteName", async (req, res) => {
       req.params.noteName,
       updatedNote
     );
-    res.send({ message: "Note updates saved." });
+    res.status(200).send({ message: "Note updates saved." });
+  } catch (error) {
+    res.status(500).send({ message: error });
+  }
+});
+
+router.delete("/api/notes/:noteName", isAuthenticated, async (req, res) => {
+  try{
+    const noteToDelete = req.params.noteName;
+    await deleteNoteByNoteName(req.session.projectId, noteToDelete)
+    res.send({ message: `${req.params.noteName} note deleted` });
   } catch (error) {
     res.send({ message: error });
   }
-});
+})
 
 export default router;

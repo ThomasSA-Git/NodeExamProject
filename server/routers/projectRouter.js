@@ -5,6 +5,7 @@ const router = Router();
 import {
   createProject,
   deleteProject,
+  findProjectByProjectId,
   findProjectsByUser,
 } from "../db/projectsDb.js";
 
@@ -61,6 +62,7 @@ router.post("/api/projects", isAuthenticated, async (req, res) => {
     await addProjectIdToUser(purifiedUsername, project.insertedId);
 
     res.status(201).send({ message: "Project created successfully" });
+ 
   } catch (error) {
     console.error("Error in creating project", error);
     res.status(500).json({ error: "Internal server error" });
@@ -70,12 +72,12 @@ router.post("/api/projects", isAuthenticated, async (req, res) => {
 router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.params.projectId;
-
+    const foundProject = await findProjectByProjectId(projectId);
+    const users = foundProject.users;
     await deleteProject(projectId);
-
-    await removeProjectIdFromUser(projectId);
-
-    res.status(201).send({ message: `Project '${projectId}' deleted successfully.` });
+   
+      await Promise.all(users.map(user => removeProjectIdFromUser(user, projectId)));
+      res.status(201).send({ message: `Project deleted successfully. Redirecting` });
   } catch (error) {
     console.error("Error in delete project", error);
     res.status(500).json({ error: "Internal server error" });

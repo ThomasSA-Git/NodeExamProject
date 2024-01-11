@@ -65,7 +65,6 @@
 
   async function handleCreateNewNote() {
     try {
-    
       const newNote = {
         time: new Date().getTime(),
         blocks: [
@@ -78,6 +77,10 @@
         ],
         version: "2.12.4",
       };
+
+      if (newNoteName === undefined) {
+        newNoteName = "Project Note";
+      }
 
       const noteData = {
         projectId: $currentProjectId,
@@ -98,15 +101,14 @@
 
       if (response.ok) {
         const result = await response.json();
-        if(result.created){
-        $currentNoteName = newNoteName;
-        newNoteName = "";
-        //navigation and reset of newNoteName not working. FIXXX!!!!!!
-        navigate("/notes")
-      }
-      else{
-        showToast(result.message, "error");
-      }
+        if (result.created) {
+          $currentNoteName = newNoteName;
+          newNoteName = "";
+          //navigation and reset of newNoteName not working. FIXXX!!!!!!
+          navigate("/notes");
+        } else {
+          showToast(result.message, "error");
+        }
       } else {
         console.error("Failed to save data:", response.statusText);
       }
@@ -123,15 +125,17 @@
     });
   }
 
+
+
   function handleNavigate(noteName) {
     $currentNoteName = noteName;
     navigate("/notes");
   }
 </script>
 
-  <label for="newNoteName">New note name</label>
-  <input type="text" bind:value={newNoteName} required />
-  <button on:click={handleCreateNewNote}>Create</button>
+<label for="newNoteName">New note name</label>
+<input type="text" bind:value={newNoteName} required />
+<button on:click={handleCreateNewNote}>Create</button>
 
 <hr />
 
@@ -145,10 +149,7 @@
     </thead>
     <tbody>
       {#each paginatedItems as item}
-        <tr
-          class="item"
-          on:click={() => handleNavigate(item.noteName)}
-        >
+        <tr class="item" on:click={() => handleNavigate(item.noteName)}>
           <td>{item.noteName}</td>
           <td style="max-width: 100px;">{handleDate(item.note.time)}</td>
         </tr>

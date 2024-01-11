@@ -115,7 +115,7 @@
 </script>
 
 <h1>Hello {$user}</h1>
-<p>
+<p style="text-align: center">
   Here you can see a list of projects you're involved in or create a new
   project.
 </p>

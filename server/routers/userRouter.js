@@ -9,8 +9,6 @@ import {
 
 import { createUserResponse } from "../dto/userResponse.js";
 
-import { purify } from "../util/DOMpurify.js";
-
 function isAuthenticated(req, res, next) {
   if (req.session && req.session.user) {
     return next();

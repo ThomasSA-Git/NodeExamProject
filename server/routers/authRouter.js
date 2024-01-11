@@ -26,7 +26,7 @@ import { generateToken } from "../util/tokenGenerator.js";
 import {
   registerMailSubject,
   registerMailMessage,
-  sendFakeEmail,
+  sendEmail,
   passwordResetSubject,
   passwordResetMessage,
 } from "../nodemailer/nodemailer.js";
@@ -63,7 +63,6 @@ router.post("/api/auth/login", async (req, res) => {
 
 router.post("/api/auth/register", async (req, res) => {
   const { username, email, password } = req.body;
-  console.log(email)
   // purify relevant input
   const purifiedUsername = purify(username);
   const purifiedEmail = purify(email);
@@ -74,7 +73,6 @@ router.post("/api/auth/register", async (req, res) => {
   const userExists = await findUserByUsername(username);
 
   if (userExists) {
-    console.log("Username is taken.");
     res.status(401).json({ error: "Username is taken" });
   } else {
     // Create user in mongodb
@@ -82,7 +80,7 @@ router.post("/api/auth/register", async (req, res) => {
 
     // Send mail confirming registration
     const mailMessage = registerMailMessage(username);
-    sendFakeEmail(email, registerMailSubject, mailMessage);
+    sendEmail(email, registerMailSubject, mailMessage);
 
     res.json({ message: "Registration successful. Redirecting to login." });
   }
@@ -92,7 +90,6 @@ router.get("/api/auth/logout", (req, res) => {
   // delete session
   delete req.session.user;
   sessionUser = undefined;
-  // maybe delete below, not necessary
   res.send({ data: "You're logged out." });
 });
 
@@ -109,13 +106,12 @@ router.post("/api/auth/getSecretToken", async (req, res) => {
       await deleteUserTokenByUsername(username);
     }
 
-    // Generates new token and adds it to the db with username in seperate document with 30 min lifespan.
+    // generates new token and adds it to the db with username in seperate document with 30 min lifespan.
     if (userExists) {
       const token = generateToken();
       await addToResetPassword(username, token);
-      console.log(userExists)
       const message = passwordResetMessage(username, token);
-      sendFakeEmail(userExists.email, passwordResetSubject, message);
+      sendEmail(userExists.email, passwordResetSubject, message);
 
       res
         .status(200)

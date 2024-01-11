@@ -135,7 +135,7 @@ io.on("connection", (socket) => {
       const projectId = data.projectId;
       const result = await updateDiagram(projectId, diagram);
       if (result.acknowledged && result.matchedCount) {
-        // Emit the updated diagram to all clients in the same room
+        // emit the updated diagram to all clients in the same room
         const updatedProject = await findProjectByProjectId(data.projectId);
         io.to(socket.projectId).emit("diagram-data", updatedProject.diagram);
 
@@ -152,7 +152,6 @@ io.on("connection", (socket) => {
     try {
     
       const userExists = await findUserByUsername(data.searchUser);
-      console.log(userExists)
       if (userExists === null) {
         io.emit("find-user-error", { message: "User not found" });
       } else {

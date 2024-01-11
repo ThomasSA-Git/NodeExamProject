@@ -1,14 +1,14 @@
 <script>
   import EditorJS from "@editorjs/editorjs";
   import Header from "@editorjs/header";
-  import Paragraph from 'editorjs-paragraph-with-alignment';
+  import Paragraph from "editorjs-paragraph-with-alignment";
   import Quote from "@editorjs/quote";
   import Alert from "editorjs-alert";
   import List from "@editorjs/list";
   import Alignment from "editorjs-text-alignment-blocktune";
   import { onMount } from "svelte";
   import { BASE_URL } from "../../store/global";
-  import { currentProjectId, currentNoteName } from "../../store/project";
+  import { currentNoteName } from "../../store/project";
   import { showToast } from "../../assets/js/toast.js";
   import "../../assets/css/toast.css";
   import { navigate } from "svelte-navigator";
@@ -27,17 +27,16 @@
       tools: {
         header: {
           class: Header,
-          tunes: ['anyTuneName'],  
+          tunes: ["anyTuneName"],
         },
         paragraph: {
-          class: Paragraph
+          class: Paragraph,
         },
         quote: Quote,
         alert: Alert,
         list: List,
-        anyTuneName: Alignment
-      }
-      
+        anyTuneName: Alignment,
+      },
     });
   }
 
@@ -77,14 +76,30 @@
       });
       const result = await response.json();
       if (response.ok) {
-     
         showToast(result.message, "success");
       } else {
-  
         showToast(result.message, "error");
       }
     } catch (error) {
       showToast(`Save failed. Error: ${error.message}`, "error");
+    }
+  }
+
+  async function handleDeleteNote() {
+    try {
+      const response = await fetch($BASE_URL + `/notes/${$currentNoteName}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (response.ok) {
+        showToast(result.message, "success");
+        navigate("/noteOverview");
+      } else {
+        showToast(result.message, "error");
+      }
+    } catch (error) {
+      showToast(error.message, "error");
     }
   }
 
@@ -94,9 +109,10 @@
 </script>
 
 <div>
-
+  <h2>{$currentNoteName}</h2>
   <button on:click={handleUpdate}>Save changes</button>
   <button class="navigate-button" on:click={handleNavigate}>Back</button>
+  <button class="delete-btn" on:click={handleDeleteNote}>Delete</button>
   <div id="editorjs"></div>
 </div>
 
