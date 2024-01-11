@@ -5,19 +5,29 @@
     Controls,
     Background,
     MiniMap,
-    SvelteFlowProvider
+    SvelteFlowProvider,
   } from "@xyflow/svelte";
   import { onDestroy, onMount } from "svelte";
   import "@xyflow/svelte/dist/style.css";
   import CustomNode from "./CustomNode.svelte";
   import Sidebar from "./Sidebar.svelte";
-  import { BASE_URL } from "../../store/global";
+  import EdgeSidebar from "./EdgeSidebar.svelte";
   import { showToast } from "../../assets/js/toast";
   import "../../assets/css/toast.css";
   import { navigate } from "svelte-navigator";
+  import { currentProjectId } from "../../store/project";
+  import { user } from "../../store/stores";
+  import { IO_URL } from "../../store/global";
+  import io from "socket.io-client";
+
+  const socket = io($IO_URL, {
+    query: {
+      projectId: $currentProjectId,
+      username: $user,
+    },
+  });
 
   let initialNodes = [];
-
   let initialEdges = [];
 
   const nodes = writable(initialNodes);
@@ -31,6 +41,7 @@
       console.log(
         `Node ${node.id} position: x=${node.position.x}, y=${node.position.y}`
       );
+
       return node;
     });
 
@@ -49,63 +60,26 @@
     custom: CustomNode,
   };
 
-  onMount(async () => {
-    try {
-      const response = await fetch($BASE_URL + "/diagram", {
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log(data[0]);
-        initialNodes = data.nodes;
-        initialEdges = data.edges;
-        // Update the Svelte store with the fetched data
-        nodes.set(data.diagram.nodes);
-        edges.set(data.diagram.edges);
-      } else {
-        showToast(data.message, "error");
-      }
-    } catch (error) {
-      showToast(error, "error");
-    }
-  });
-
-  async function handleSave() {
-    try {
-      const diagram = {
-        nodes: initialNodes,
-        edges: initialEdges,
-      };
-
-      const response = await fetch($BASE_URL + "/diagram", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(diagram),
-        credentials: "include",
-      });
-      const result = await response.json();
-      if (response.ok) {
-        showToast(result.message, "success");
-      } else {
-        showToast(result.message, "error");
-      }
-    } catch (error) {
-      showToast(error, "error");
-    }
-  }
+  onMount(loadDiagram);
 
   function handleAddNode() {
-    const numericIds = initialNodes.map((node) => parseInt(node.id, 10));
-    const highestId = Math.max(...numericIds);
+    let id = "1";
+    let highestId;
+    if (Array.isArray(initialNodes) && initialNodes.length != 0) {
+      const numericIds = initialNodes.map((node) => parseInt(node.id, 10));
+      highestId = Math.max(...numericIds);
+      id = (highestId + 1).toString();
+    }
+
     const newNode = {
-      id: (highestId + 1).toString(),
+      id: id,
       data: { label: "New node", text: "" },
       position: { x: 10, y: 0 },
       type: "custom",
     };
+
     nodes.update((currentNodes) => [...currentNodes, newNode]);
+    saveDiagram();
   }
 
   function handleDeleteNode(nodeId) {
@@ -117,19 +91,76 @@
       (edge) => edge.source !== nodeId && edge.target !== nodeId
     );
     edges.set(initialEdges);
+
+    saveDiagram();
   }
 
-  function handleUpdate(){
+  function handleDeleteEdge(edgeId) {
+    // remove the node with the given ID from the list of nodes
+    initialEdges = initialEdges.filter((edge) => edge.id !== edgeId);
     nodes.set(initialNodes);
+
+    saveDiagram();
+  }
+
+  function loadDiagram() {
+    try {
+      socket.emit("load-diagram", {
+        projectId: $currentProjectId,
+        username: $user,
+      });
+
+      socket.on("diagram-data", (data) => {
+        console.log(data.nodes);
+        if (data && data.nodes && data.edges) {
+          initialNodes = data.nodes;
+          initialEdges = data.edges;
+
+          nodes.set(initialNodes);
+          edges.set(initialEdges);
+        }
+      });
+    } catch (error) {
+      showToast(error, "error");
+    }
+  }
+
+  function saveDiagram() {
+    const diagram = {
+      nodes: initialNodes,
+      edges: initialEdges,
+    };
+    socket.emit("save-diagram", {
+      diagram,
+      projectId: $currentProjectId,
+      username: $user,
+    });
+    socket.on("diagram-save-success", (data) => {
+      showToast(data.message, "success");
+    });
+    socket.on("diagram-save-failure", (data) => {
+      showToast(data.message, "error");
+    });
   }
 
   onDestroy(() => {
+    saveDiagram();
     unsubscribeNodes();
     unsubscribeEdges();
+    socket.emit("leave-room", { projectId: $currentProjectId });
   });
 </script>
 
+<div class="buttons">
+  <button on:click={handleAddNode}>Add node</button>
+  <button on:click={saveDiagram}>Save diagram</button>
+  <button class="navigate-button" on:click={() => navigate("/project")}
+    >Back to project</button
+  >
+  <hr>
+</div>
 <div class="container">
+ 
   <div class="flow">
     <div class="svelte-flow-container">
       <SvelteFlowProvider>
@@ -141,22 +172,19 @@
       </SvelteFlowProvider>
     </div>
     <Sidebar {initialNodes} {handleDeleteNode} />
+    <EdgeSidebar {initialEdges} {handleDeleteEdge}/>
+
   </div>
 
-  <div class="buttons">
-    <button on:click={handleAddNode}>Add node</button>
-    <button on:click={handleSave}>Save diagram</button>
-    <button class="navigate-button" on:click={() => navigate("/project")}
-      >Back to project</button
-    >
-  </div>
+
 </div>
 
 <style>
   .container {
+    margin-top: 3rm;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 75vh;
   }
 
   .flow {
@@ -170,6 +198,6 @@
   }
 
   .buttons {
-    margin-top: 1rem;
+    margin-bottom: 1rem;
   }
 </style>

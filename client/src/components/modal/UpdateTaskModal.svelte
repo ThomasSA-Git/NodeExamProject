@@ -1,6 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import "../css/taskModal.css";
+    import "../../assets/css/taskModal.css";
   
     export let updateTask;
     export let taskToUpdate;

@@ -42,10 +42,11 @@ export const addUserToProject = async (projectId, username) => {
   }
 };
 
-export const deleteUserFromProject = async (projectName, username) => {
+export const deleteUserFromProject = async (projectId, username) => {
   try {
+    const _id = new ObjectId(projectId);
     const result = await db.projects.updateOne(
-      { projectName },
+      { _id },
       { $pull: { users: username } }
     );
 
@@ -95,7 +96,6 @@ export const findAllProjects = async () => {
 
 export const deleteProject = async (projectId) => {
   try {
-
     const _id = new ObjectId(projectId);
     await db.projects.deleteOne({ _id });
   } catch (err) {
@@ -106,14 +106,12 @@ export const deleteProject = async (projectId) => {
 
 export const updateKanban = async (projectId, kanban) => {
   try {
-
     const _id = new ObjectId(projectId);
 
     const result = await db.projects.updateOne(
       { _id },
       { $set: { kanban: kanban } }
     );
-
 
     return result;
   } catch (err) {
@@ -124,17 +122,16 @@ export const updateKanban = async (projectId, kanban) => {
 
 export const createNote = async (projectId, note) => {
   try {
-
     const _id = new ObjectId(projectId);
 
-    console.log(note)
+    console.log(note);
 
     const result = await db.projects.updateOne(
       { _id },
       { $push: { notes: note } }
     );
 
-      console.log(result)
+    console.log(result);
     return result;
   } catch (err) {
     console.error("Error occurred while updating Kanban", err);
@@ -146,7 +143,7 @@ export const findNotesByProjectId = async (projectId) => {
   try {
     const _id = new ObjectId(projectId);
     const result = await db.projects.findOne({ _id }, { notes: 1 });
- 
+
     return result ? result.notes : [];
   } catch (err) {
     console.error("Error occurred while finding project", err);
@@ -175,7 +172,11 @@ export const findNoteByNoteName = async (projectId, noteName) => {
   }
 };
 
-export const updateNoteByNoteName = async (projectId, noteName, updatedNoteData) => {
+export const updateNoteByNoteName = async (
+  projectId,
+  noteName,
+  updatedNoteData
+) => {
   try {
     const _id = new ObjectId(projectId);
 
@@ -197,14 +198,9 @@ export const updateNoteByNoteName = async (projectId, noteName, updatedNoteData)
 
 export const updateDiagram = async (projectId, diagram) => {
   try {
-
     const _id = new ObjectId(projectId);
 
-    const result = await db.projects.updateOne(
-      { _id },
-      { $set: { diagram } }
-    );
-
+    const result = await db.projects.updateOne({ _id }, { $set: { diagram } });
 
     return result;
   } catch (err) {

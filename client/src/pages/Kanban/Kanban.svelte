@@ -4,8 +4,8 @@
   import { flip } from "svelte/animate";
   import "../../assets/css/kanban.css";
   import "../../assets/css/toast.css";
-  import TaskModal from "../../assets/modal/TaskModal.svelte";
-  import UpdateTaskModal from "../../assets/modal/UpdateTaskModal.svelte";
+  import TaskModal from "../../components/modal/TaskModal.svelte";
+  import UpdateTaskModal from "../../components/modal/UpdateTaskModal.svelte";
   import { IO_URL } from "../../store/global";
   import io from "socket.io-client";
   import { onMount, onDestroy } from "svelte";
@@ -74,18 +74,21 @@
       tasks: [],
     };
 
-    // Use set to update the lists array
+    // update lists in kanban
     kanban = [...kanban, newList];
+    handleSaveKanban();
   }
 
   // Function to handle editing list name
   function handleEditListName(listIndex, newName) {
     kanban[listIndex].name = newName;
+    handleSaveKanban();
   }
 
   function addTask(newTask) {
     // Adds the new task to the first index of the lists array
     kanban[0].tasks = [newTask, ...kanban[0].tasks];
+    handleSaveKanban();
   }
 
   // Modal logic
@@ -119,6 +122,7 @@
     kanban[listIndexToUpdate].tasks[updateTaskIndex] = updatedTask;
 
     kanban = [...kanban];
+    handleSaveKanban();
     closeUpdateModal();
   }
 
@@ -126,12 +130,14 @@
     kanban[listIndex].tasks.splice(taskIndex, 1);
     // Updates tasks on lists array to trigger reactivity
     kanban = [...kanban];
+    handleSaveKanban();
   }
 
   function deleteList(listIndex) {
     kanban.splice(listIndex, 1);
     // Updates lists array to trigger reactivity
     kanban = [...kanban];
+    handleSaveKanban();
   }
 
   onMount(loadKanban);
@@ -154,14 +160,7 @@
     } catch (error) {
       console.error("Error emitting load-kanban event:", error);
     }
-
-    // Clean up the interval when the component is unmounted
   }
-
-  onDestroy(() => {
-    // Leave the room based on currentProjectId
-    socket.emit("leave-room", { projectId: $currentProjectId });
-  });
 
   function handleSaveKanban() {
     socket.emit("save-kanban", {
@@ -172,28 +171,28 @@
     socket.on("save-success", (data) => {
       showToast(data.message, "success");
       //loadKanban()
-      console.log(data)
+      console.log(data);
     });
     socket.on("save-failure", (data) => {
       showToast(data.message, "error");
     });
   }
 
+  onDestroy(() => {
+    socket.emit("leave-room", { projectId: $currentProjectId });
+  });
+
   function handleNavigate(path) {
     navigate(path);
   }
 </script>
 
-<!-- Button for adding lists and tasks -->
 <div class="btn-container">
   <h3 style="margin-right: 300px;">Kanban board for {$currentProjectName}</h3>
   <button class="btn-container-btn" on:click={handleAddList}>Add list</button>
   <button class="btn-container-btn" on:click={openModal}>Add Task</button>
-  <button class="btn-container-btn" on:click={handleSaveKanban}
-    >Save kanban</button
-  >
   <button class="navigate-button" on:click={() => handleNavigate("/project")}
-    >Project overview</button
+    >Dashboard</button
   >
 </div>
 
@@ -221,7 +220,7 @@
 
         <button class="delete-button" on:click={() => deleteList(listIndex)}>
           <img
-            src="../../public/delete-icon.jpg"
+            src="../../delete-icon.jpg"
             alt="Delete List"
             class="delete-image"
           />
@@ -249,7 +248,7 @@
                   on:click={() => openUpdateModal(listIndex, taskIndex, task)}
                 >
                   <img
-                    src="../../public/edit-icon.png"
+                    src="../../edit-icon.png"
                     alt="Edit Task"
                     class="edit-image"
                   />
@@ -260,7 +259,7 @@
                   on:click={() => deleteTask(listIndex, taskIndex)}
                 >
                   <img
-                    src="../../public/delete-icon.jpg"
+                    src="../../delete-icon.jpg"
                     alt="Delete Task"
                     class="delete-image"
                   />

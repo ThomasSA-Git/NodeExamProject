@@ -1,6 +1,4 @@
-<script>
-    import { createEventDispatcher } from 'svelte';
-  
+<script>  
     export let initialNodes;
     export let handleDeleteNode;
   
@@ -9,7 +7,11 @@
     }
   </script>
   
-  <aside>
+
+  <div class="sidebar">
+    <h3>Nodes</h3>
+    <hr>
+    {#if Array.isArray(initialNodes) && initialNodes.length != 0}
     {#each initialNodes as { id, data }}
       <div class="node-item">
         <p>ID: {id}</p>
@@ -18,14 +20,17 @@
       </div>
       <hr>
     {/each}
-  </aside>
+    {/if}
+  </div>
   
   <style>
-    aside {
+     .sidebar {
       width: 10vw;
       background: #f4f4f4;
       padding: 0.4rem 0.8rem;
       font-size: 12px;
+      max-height: 70vh;
+      overflow-y: scroll;
     }
   
     .node-item {

@@ -123,6 +123,19 @@ button {
   cursor: pointer;
 }
 
+.delete-btn {
+  margin-top: 15px;
+  background-color: red;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.delete-btn:hover{
+  background-color: darkred;
+}
+
 .navigate-button {
   margin-top: 15px;
   background-color: rgb(57, 66, 165);

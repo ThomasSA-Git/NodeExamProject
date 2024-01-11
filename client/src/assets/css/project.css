@@ -1,0 +1,46 @@
+.container {
+    display: flex;
+    box-sizing: border-box;
+    width: 50%;
+    height: 440px;
+    padding: 10px;
+    border: 3px solid #ccc;
+    border-radius: 20px;
+    margin: 20px;
+  }
+
+  h2 {
+    text-align: center;
+    flex: 1000px;
+  }
+
+  p {
+    text-align: left;
+    margin-bottom: 0;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+  }
+  .wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    min-width: 300px;
+    max-height: 300px;
+    overflow-y: scroll;
+  }
+
+  rect {
+    fill: #2748ca;
+  }
+
+  .add-user {
+    margin-right: 40px;
+  }
+
+  .user-table {
+    overflow-y: scroll;
+    min-height: 250px;
+  }

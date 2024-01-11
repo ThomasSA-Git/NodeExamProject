@@ -10,7 +10,6 @@
   import Project from "./pages/Project/Project.svelte";
   import NoteSystem from "./pages/NoteSystem/NoteSystem.svelte";
   import { user, role } from "./store/stores.js";
-  import { currentProjectId } from "./store/project";
   import { url } from "./util/apiUrl";
   import Diagram from "./pages/Diagram/Diagram.svelte";
   import NoteOverview from "./pages/NoteOverview/NoteOverview.svelte";
@@ -57,8 +56,6 @@
     <Route path="/login"><Login /></Route>
     <Route path="/signup"><Signup /></Route>
     <Route path="/resetpassword"><ResetPassword /></Route>
-    <Route path="/diagram"><Diagram /></Route>
-    <Route path="/notes"><NoteSystem /></Route>
 
     <PrivateRoute path="/project" let:location><Project /></PrivateRoute>
     <PrivateRoute path="/kanban" let:location><Kanban /></PrivateRoute>

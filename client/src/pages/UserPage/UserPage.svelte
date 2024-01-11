@@ -67,7 +67,7 @@
       if (response.ok) {
         const result = await response.json();
         newProjectName = "";
-        $currentProjectName = newProjectName; // or use result.projectName if it's returned
+        $currentProjectName = newProjectName;
         showToast(result.message, "success");
         setTimeout(() => {
           loadProjects();
@@ -100,7 +100,7 @@
       sortDirection = 'asc';
     }
 
-    // Sort the items array
+    // Sorts the array with projects (called items because of paginate lite)
     items = [...items].sort((a, b) => {
       const aValue = column === 'projectName' ? a.projectName : a.createdAt;
       const bValue = column === 'projectName' ? b.projectName : b.createdAt;
