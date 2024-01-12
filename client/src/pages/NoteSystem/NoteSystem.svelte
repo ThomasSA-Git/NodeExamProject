@@ -11,6 +11,7 @@
   import { currentNoteName } from "../../store/project";
   import { showToast } from "../../assets/js/toast.js";
   import "../../assets/css/toast.css";
+  import "../../assets/css/noteSystem.css";
   import { navigate } from "svelte-navigator";
 
   let editor;
@@ -115,10 +116,3 @@
   <button class="delete-btn" on:click={handleDeleteNote}>Delete</button>
   <div id="editorjs"></div>
 </div>
-
-<style>
-  #editorjs {
-    margin: 20px;
-    border: 1px solid #ccc;
-  }
-</style>

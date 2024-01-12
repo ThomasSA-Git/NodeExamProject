@@ -89,8 +89,6 @@ import {
 
 import { purifyKanbanList } from "./util/DOMpurify.js";
 
-io.engine.use(sessionMiddleware);
-
 io.on("connection", (socket) => {
   // client joins room identified by projectId when connecting. Used for live update of kanban
   socket.join(socket.projectId);

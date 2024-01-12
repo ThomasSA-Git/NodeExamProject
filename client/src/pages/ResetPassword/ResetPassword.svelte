@@ -92,7 +92,7 @@
 
 <h1>Reset your password</h1>
 
-<div class="container">
+<div class="container" style="margin-left: 375px;">
   <div class="column">
     <h2>Get token for reset</h2>
     <p>Secret token will be sent to your mail. It will be active for 30min.</p>

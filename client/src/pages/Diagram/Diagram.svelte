@@ -14,6 +14,7 @@
   import EdgeSidebar from "./EdgeSidebar.svelte";
   import { showToast } from "../../assets/js/toast";
   import "../../assets/css/toast.css";
+  import "../../assets/css/diagram.css";
   import { navigate } from "svelte-navigator";
   import { currentProjectId } from "../../store/project";
   import { user } from "../../store/stores";
@@ -186,7 +187,7 @@
     <SvelteFlowProvider>
       <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
         <Controls />
-        <Background />
+        <Background patternColor="#FFFFFF" gap={16} />
         <MiniMap />
       </SvelteFlow>
     </SvelteFlowProvider>
@@ -194,26 +195,3 @@
   <Sidebar {initialNodes} {handleDeleteNode} />
   <EdgeSidebar {initialEdges} {handleDeleteEdge} />
 </div>
-
-<style>
-  .container {
-    margin-top: 3rm;
-    display: flex;
-    flex-direction: column;
-    height: 75vh;
-  }
-
-  .flow {
-    flex: 1;
-    display: flex;
-  }
-
-  .svelte-flow-container {
-    height: 75vh;
-    width: 88%; /* Adjust this as needed */
-  }
-
-  .buttons {
-    margin-bottom: 1rem;
-  }
-</style>

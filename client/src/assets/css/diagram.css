@@ -1,0 +1,18 @@
+.flow {
+    flex: 1;
+    display: flex;
+  }
+
+  .svelte-flow-container {
+    height: 75vh;
+    width: 88%;
+  }
+
+  .buttons {
+    margin-bottom: 1rem;
+  }
+
+  
+  rect {
+    fill: white;
+  }

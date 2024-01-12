@@ -263,3 +263,10 @@
     </div>
   </div>
 </div>
+
+<!-- style set here for rect to override the background color of diagram -->
+<style>
+   rect {
+    fill: blue;
+  }
+</style>

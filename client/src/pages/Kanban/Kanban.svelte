@@ -23,7 +23,7 @@
       });
       const result = await response.json();
       if (response.ok) {
-        //showToast(result.message, "success")
+        showToast(result.message, "success")
         socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
