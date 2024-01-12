@@ -9,13 +9,7 @@ import {
 
 import { createUserResponse } from "../dto/userResponse.js";
 
-function isAuthenticated(req, res, next) {
-  if (req.session && req.session.user) {
-    return next();
-  } else {
-    res.send({ message: "Unauthorized" });
-  }
-}
+import { isAuthenticated } from "../middleware/authMiddleWare.js";
 
 router.get("/api/members", isAuthenticated, async (req, res) => {
   try {

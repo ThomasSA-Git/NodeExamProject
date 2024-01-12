@@ -1,12 +1,10 @@
 import dotenv from "dotenv";
 
 dotenv.config();
-
 import { Router } from "express";
-
 const router = Router();
-
 import { hashPassword, comparePasswords } from "../util/bcrypt.js";
+import { isAuthenticated } from "../middleware/authMiddleWare.js";
 
 // Mongo db imports
 import {
@@ -35,7 +33,6 @@ import { purify } from "../util/DOMpurify.js";
 
 router.post("/api/auth/login", async (req, res) => {
   const { username, password } = req.body;
-
   // Find user in database
   const user = await findUserByUsername(username);
 
@@ -147,6 +144,12 @@ router.post("/api/auth/resetPassword", async (req, res) => {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error." });
   }
+});
+
+router.use(isAuthenticated);
+
+router.get("/api/auth/authSocket", isAuthenticated, (req, res) => {
+  res.status(200).send({ message: "Loading data" });
 });
 
 export default router;

@@ -6,7 +6,7 @@
   import "../../assets/css/toast.css";
   import TaskModal from "../../components/modal/TaskModal.svelte";
   import UpdateTaskModal from "../../components/modal/UpdateTaskModal.svelte";
-  import { IO_URL } from "../../store/global";
+  import { BASE_URL, IO_URL } from "../../store/global";
   import io from "socket.io-client";
   import { onMount, onDestroy } from "svelte";
   import { currentProjectId, currentProjectName } from "../../store/project";
@@ -14,11 +14,29 @@
   import { showToast } from "../../assets/js/toast.js";
   import { navigate } from "svelte-navigator";
 
-  const socket = io($IO_URL, {
-    query: {
-      projectId: $currentProjectId,
-      username: $user,
-    },
+  let socket = null;
+
+  onMount(async () => {
+    try {
+      const response = await fetch($BASE_URL + "/auth/authSocket", {
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (response.ok) {
+        //showToast(result.message, "success")
+        socket = io($IO_URL, {
+          query: {
+            projectId: $currentProjectId,
+            username: $user,
+          },
+        });
+        loadKanban();
+      } else {
+        showToast(result.message, "error");
+      }
+    } catch (error) {
+      showToast(error.message, "error");
+    }
   });
 
   let kanban = [
@@ -139,8 +157,6 @@
     kanban = [...kanban];
     handleSaveKanban();
   }
-
-  onMount(loadKanban);
 
   function loadKanban() {
     try {

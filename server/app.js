@@ -78,12 +78,18 @@ import {
   updateKanban,
   addUserToProject,
   deleteUserFromProject,
-  updateDiagram
+  updateDiagram,
 } from "./db/projectsDb.js";
 
-import { findUserByUsername, addProjectIdToUser, removeProjectIdFromUser } from "./db/usersDb.js";
+import {
+  findUserByUsername,
+  addProjectIdToUser,
+  removeProjectIdFromUser,
+} from "./db/usersDb.js";
 
 import { purifyKanbanList } from "./util/DOMpurify.js";
+
+io.engine.use(sessionMiddleware);
 
 io.on("connection", (socket) => {
   // client joins room identified by projectId when connecting. Used for live update of kanban
@@ -121,14 +127,16 @@ io.on("connection", (socket) => {
       const projectId = data.projectId;
       const project = await findProjectByProjectId(projectId);
       if (!project.diagram || project.diagram === 0) {
-        socket.emit("diagram-save-failure", { message: "Diagram update failed" });
+        socket.emit("diagram-save-failure", {
+          message: "Diagram update failed",
+        });
       } else {
         io.to(socket.projectId).emit("diagram-data", project.diagram);
       }
     } catch (error) {
       socket.emit("diagram-save-failure", { message: `Error: ${error}` });
     }
-  })
+  });
   socket.on("save-diagram", async (data) => {
     try {
       const diagram = data.diagram;
@@ -141,16 +149,17 @@ io.on("connection", (socket) => {
 
         socket.emit("diagram-save-success", { message: "Diagram updated" });
       } else {
-        socket.emit("diagram-save-failure", { message: "Diagram update failed" });
+        socket.emit("diagram-save-failure", {
+          message: "Diagram update failed",
+        });
       }
     } catch (error) {
       socket.emit("diagram-save-failure", { message: `Error: ${error}` });
     }
-  })
+  });
 
   socket.on("search-user", async (data) => {
     try {
-    
       const userExists = await findUserByUsername(data.searchUser);
       if (userExists === null) {
         io.emit("find-user-error", { message: "User not found" });
@@ -165,7 +174,10 @@ io.on("connection", (socket) => {
   socket.on("add-user", async (data) => {
     try {
       const result = await addUserToProject(data.projectId, data.username);
-      const resultUser = await addProjectIdToUser(data.username, data.projectId);
+      const resultUser = await addProjectIdToUser(
+        data.username,
+        data.projectId
+      );
       if (result.modifiedCount === 1 && resultUser.modifiedCount === 1) {
         io.emit("add-user-success", { message: "User added" });
       } else {
@@ -179,9 +191,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("remove-user", async (data) => {
-    try{
+    try {
       const result = await deleteUserFromProject(data.projectId, data.username);
-      const resultUser = await removeProjectIdFromUser(data.username, data.projectId);
+      const resultUser = await removeProjectIdFromUser(
+        data.username,
+        data.projectId
+      );
       if (result.modifiedCount === 1 && resultUser.modifiedCount === 1) {
         io.emit("remove-user-success", { message: "User removed" });
       } else {

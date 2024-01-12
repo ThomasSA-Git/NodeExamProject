@@ -17,14 +17,37 @@
   import { navigate } from "svelte-navigator";
   import { currentProjectId } from "../../store/project";
   import { user } from "../../store/stores";
-  import { IO_URL } from "../../store/global";
+  import { BASE_URL, IO_URL } from "../../store/global";
   import io from "socket.io-client";
 
-  const socket = io($IO_URL, {
-    query: {
-      projectId: $currentProjectId,
-      username: $user,
-    },
+  let socket = null; /* io($IO_URL, {
+          query: {
+            projectId: $currentProjectId,
+            username: $user,
+          },
+        });; */
+
+  onMount(async () => {
+    try {
+      const response = await fetch($BASE_URL + "/auth/authSocket", {
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (response.ok) {
+        showToast(result.message, "success");
+        socket = io($IO_URL, {
+          query: {
+            projectId: $currentProjectId,
+            username: $user,
+          },
+        });
+        loadDiagram();
+      } else {
+        showToast(result.message, "error");
+      }
+    } catch (error) {
+      showToast(error.message, "error");
+    }
   });
 
   let initialNodes = [];
@@ -59,8 +82,6 @@
   const nodeTypes = {
     custom: CustomNode,
   };
-
-  onMount(loadDiagram);
 
   function handleAddNode() {
     let id = "1";
@@ -157,26 +178,21 @@
   <button class="navigate-button" on:click={() => navigate("/project")}
     >Back to project</button
   >
-  <hr>
+  <hr />
 </div>
-<div class="container">
- 
-  <div class="flow">
-    <div class="svelte-flow-container">
-      <SvelteFlowProvider>
-        <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
-          <Controls />
-          <Background />
-          <MiniMap />
-        </SvelteFlow>
-      </SvelteFlowProvider>
-    </div>
-    <Sidebar {initialNodes} {handleDeleteNode} />
-    <EdgeSidebar {initialEdges} {handleDeleteEdge}/>
 
+<div class="flow">
+  <div class="svelte-flow-container">
+    <SvelteFlowProvider>
+      <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
+        <Controls />
+        <Background />
+        <MiniMap />
+      </SvelteFlow>
+    </SvelteFlowProvider>
   </div>
-
-
+  <Sidebar {initialNodes} {handleDeleteNode} />
+  <EdgeSidebar {initialEdges} {handleDeleteEdge} />
 </div>
 
 <style>

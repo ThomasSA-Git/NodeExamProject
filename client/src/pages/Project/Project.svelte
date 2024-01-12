@@ -15,12 +15,7 @@
   import { IO_URL } from "../../store/global";
   import io from "socket.io-client";
 
-  const socket = io($IO_URL, {
-    query: {
-      projectId: $currentProjectId,
-      username: $user,
-    },
-  });
+  let socket = null;
 
   let kanban = [];
   let taskSum;
@@ -40,6 +35,12 @@
 
       if (response.ok) {
         const result = await response.json();
+        socket = io($IO_URL, {
+          query: {
+            projectId: $currentProjectId,
+            username: $user,
+          },
+        });
         kanban = result.projectData.kanban;
         taskSum = kanban.reduce(
           (accumulator, current) => accumulator + current.taskCount,
@@ -64,14 +65,13 @@
         }
       );
       const result = await response.json();
-      if(response.ok){
+      if (response.ok) {
         showToast(result.message, "success");
 
         setTimeout(() => {
-          navigate("/userpage")
+          navigate("/userpage");
         }, 3000);
-      }
-      else{
+      } else {
         showToast(result.message, "error");
       }
     } catch (error) {
@@ -85,7 +85,8 @@
       searchStatus = "";
       userFound = false;
     } else {
-      searchStatus = "User is already in the project";
+      searchStatus = "User is already added";
+      userFound = false;
     }
     socket.on("find-user-result", () => {
       userFound = true;
@@ -185,8 +186,10 @@
     >User overview</button
   >
 
-  <button class="delete-btn" style="margin-left:150px" on:click={handleDeleteProject}
-    >Delete project</button
+  <button
+    class="delete-btn"
+    style="margin-left:150px"
+    on:click={handleDeleteProject}>Delete project</button
   >
 </div>
 <hr />
@@ -237,10 +240,12 @@
 
     <div class="add-user">
       <h3>Search user to add:</h3>
-      <input type="text" on:change={handleSearchUser} bind:value={searchUser} />
-      {#if userFound && searchUser != ""}
-        <button on:click={handleAddUser}>Add user</button>
-      {/if}
+      <div class="input-container">
+        <input type="text" on:keyup={handleSearchUser} bind:value={searchUser} />
+        {#if userFound && searchUser != ""}
+          <button on:click={handleAddUser}>Add</button>
+        {/if}
+      </div>
       <p style="color: red;"><strong>{searchStatus}</strong></p>
     </div>
     <div class="user-table">

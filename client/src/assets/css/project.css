@@ -39,6 +39,12 @@
   .add-user {
     margin-right: 40px;
   }
+  
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px; /* Adjust as needed for spacing */
+  }
 
   .user-table {
     overflow-y: scroll;
