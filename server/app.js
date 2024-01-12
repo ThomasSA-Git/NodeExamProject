@@ -91,7 +91,9 @@ import { purifyKanbanList } from "./util/DOMpurify.js";
 
 io.on("connection", (socket) => {
   // client joins room identified by projectId when connecting. Used for live update of kanban
-  socket.join(socket.projectId);
+  const projectId = socket.handshake.query.projectId;
+
+  socket.join(projectId);
   socket.on("save-kanban", async (data) => {
     try {
       const purifiedKanban = data.kanban.map(purifyKanbanList);

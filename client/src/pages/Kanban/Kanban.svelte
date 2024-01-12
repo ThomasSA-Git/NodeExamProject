@@ -23,6 +23,7 @@
         credentials: "include",
       });
       const result = await response.json();
+      console.log($currentProjectId)
       if (response.ok) {
         socket = io($IO_URL, {
           query: {
