@@ -29,13 +29,6 @@ export const addUserToProject = async (projectId, username) => {
       { _id },
       { $addToSet: { users: username } }
     );
-
-    if (result.modifiedCount === 1) {
-      console.log("User added to project successfully");
-    } else {
-      console.log("Project not found or user already in the project");
-    }
-
     return result;
   } catch (err) {
     console.error("Error occurred while adding user to project", err);
@@ -50,13 +43,6 @@ export const deleteUserFromProject = async (projectId, username) => {
       { _id },
       { $pull: { users: username } }
     );
-
-    if (result.modifiedCount === 1) {
-      console.log("User removed from project successfully");
-    } else {
-      console.log("Project not found or user not in the project");
-    }
-
     return result;
   } catch (err) {
     console.error("Error occurred while removing user from project", err);
@@ -129,14 +115,10 @@ export const createNote = async (projectId, note) => {
   try {
     const _id = new ObjectId(projectId);
 
-    console.log(note);
-
     const result = await db.projects.updateOne(
       { _id },
       { $push: { notes: note } }
     );
-
-    console.log(result);
     return result;
   } catch (err) {
     console.error("Error occurred while updating Kanban", err);
@@ -165,14 +147,11 @@ export const findNoteByNoteName = async (projectId, noteName) => {
       { projection: { "notes.$": 1, _id: 0 } }
     );
 
-    // Extract only the 'notes' field from the result
     const notesArray = result ? result.notes : [];
 
-    console.log(notesArray); // Log the extracted notes array
     return notesArray;
   } catch (err) {
     console.error("Error occurred while finding notes by noteName", err);
-    // Handle the error gracefully, you can choose to return a specific value or rethrow the error
     throw new Error("Failed to find note by note name");
   }
 };
@@ -189,12 +168,6 @@ export const updateNoteByNoteName = async (
       { _id, "notes.noteName": noteName },
       { $set: { "notes.$": updatedNoteData } }
     );
-
-    if (result.matchedCount === 1 && result.modifiedCount === 1) {
-      console.log("Note updated successfully!");
-    } else {
-      console.error("Failed to update note.");
-    }
   } catch (err) {
     console.error("Error occurred while updating note by noteName", err);
     throw new Error("Failed to update note by note name");
@@ -210,12 +183,6 @@ export const deleteNoteByNoteName = async (projectId, noteName) => {
       { _id },
       { $pull: { notes: { noteName } } }
     );
-
-    if (result.modifiedCount === 1) {
-      console.log(`Note '${noteName}' deleted successfully.`);
-    } else {
-      console.log(`Note '${noteName}' not found or not deleted.`);
-    }
   } catch (err) {
     console.error("Error occurred while deleting note by noteName", err);
     // Handle the error gracefully, you can choose to return a specific value or rethrow the error
@@ -230,7 +197,6 @@ export const updateDiagram = async (projectId, diagram) => {
     const _id = new ObjectId(projectId);
 
     const result = await db.projects.updateOne({ _id }, { $set: { diagram } });
-
     return result;
   } catch (err) {
     console.error("Error occurred while updating diagram", err);

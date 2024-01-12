@@ -5,5 +5,3 @@ export const currentProjectName = writable(null);
 export const currentProjectId = writable(null);
 
 export const currentNoteName = writable(null);
-
-export const projectUsers = writable(null);

@@ -16,6 +16,9 @@ app.use(
 import http from "http";
 const server = http.createServer(app);
 
+import helmet from "helmet";
+app.use(helmet());
+
 import { Server } from "socket.io";
 export const io = new Server(server, {
   cors: {
@@ -60,9 +63,6 @@ const authRateLimiter = rateLimit({
 import authRouter from "./routers/authRouter.js";
 app.use(authRouter);
 app.use("/auth", authRateLimiter);
-
-import userRouter from "./routers/userRouter.js";
-app.use(userRouter);
 
 import projectRouter from "./routers/projectRouter.js";
 app.use(projectRouter);

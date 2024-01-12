@@ -20,13 +20,12 @@ import { purify } from "../util/DOMpurify.js";
 
 import { isAuthenticated } from "../middleware/authMiddleWare.js";
 
-
 router.get("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.params.projectId;
     req.session.projectId = projectId;
     const projectData = await dataForProjectPage(projectId);
-    res.send({ projectData });
+    res.status(200).send({ projectData });
   } catch (error) {
     console.error("Error in getting project", error);
     res.status(500).json({ error: "Internal server error" });
@@ -38,7 +37,7 @@ router.get("/api/projects", isAuthenticated, async (req, res) => {
     const username = req.session.user.username;
     const projects = await findProjectsByUser(username);
     const projectsWithDates = projects.map(convertTimestampToDate);
-    res.send({ data: projectsWithDates });
+    res.status(200).send({ data: projectsWithDates });
   } catch (error) {
     console.error("Error in getting project", error);
     res.status(500).json({ error: "Internal server error" });
@@ -73,9 +72,7 @@ router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
     await Promise.all(
       users.map((user) => removeProjectIdFromUser(user, projectId))
     );
-    res
-      .status(201)
-      .send({ message: `Project deleted successfully. Redirecting` });
+    res.status(200).send({ message: `Project deleted successfully. Redirecting` });
   } catch (error) {
     console.error("Error in delete project", error);
     res.status(500).json({ error: "Internal server error" });

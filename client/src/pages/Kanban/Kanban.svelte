@@ -24,7 +24,6 @@
       });
       const result = await response.json();
       if (response.ok) {
-        showToast(result.message, "success");
         socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
@@ -58,6 +57,39 @@
       tasks: [],
     },
   ];
+
+  function loadKanban() {
+    try {
+      socket.emit("load-kanban", {
+        projectId: $currentProjectId,
+        username: $user,
+      });
+
+      socket.on("kanban-data", (data) => {
+        if (data && Array.isArray(data)) {
+          if (data.length > 0) {
+            kanban = data;
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error emitting load-kanban event:", error);
+    }
+  }
+
+  function handleSaveKanban() {
+    socket.emit("save-kanban", {
+      kanban,
+      projectId: $currentProjectId,
+      username: $user,
+    });
+    socket.on("save-success", (data) => {
+      showToast(data.message, "success");
+    });
+    socket.on("save-failure", (data) => {
+      showToast(data.message, "error");
+    });
+  }
 
   let hoveringOverList;
 
@@ -151,40 +183,6 @@
     // Updates lists array to trigger reactivity
     kanban = [...kanban];
     handleSaveKanban();
-  }
-
-  function loadKanban() {
-    try {
-      socket.emit("load-kanban", {
-        projectId: $currentProjectId,
-        username: $user,
-      });
-
-      socket.on("kanban-data", (data) => {
-        console.log(data);
-        if (data && Array.isArray(data)) {
-          if (data.length > 0) {
-            kanban = data;
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error emitting load-kanban event:", error);
-    }
-  }
-
-  function handleSaveKanban() {
-    socket.emit("save-kanban", {
-      kanban,
-      projectId: $currentProjectId,
-      username: $user,
-    });
-    socket.on("save-success", (data) => {
-      showToast(data.message, "success");
-    });
-    socket.on("save-failure", (data) => {
-      showToast(data.message, "error");
-    });
   }
 
   onDestroy(() => {

@@ -1,7 +1,6 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import "dotenv/config";
 
-//const url = "mongodb://localhost:27017/exam";
 const url = `mongodb+srv://ThomasKEA:${process.env.MONGO_PASSWORD}@projectmanager.t0hnj3x.mongodb.net/`;
 
 const client = new MongoClient(url, {

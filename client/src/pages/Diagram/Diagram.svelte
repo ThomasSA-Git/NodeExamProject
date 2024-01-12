@@ -10,7 +10,7 @@
   import { onDestroy, onMount } from "svelte";
   import "@xyflow/svelte/dist/style.css";
   import CustomNode from "./CustomNode.svelte";
-  import Sidebar from "./Sidebar.svelte";
+  import NodeSidebar from "./NodeSidebar.svelte";
   import EdgeSidebar from "./EdgeSidebar.svelte";
   import { showToast } from "../../assets/js/toast";
   import "../../assets/css/toast.css";
@@ -21,12 +21,7 @@
   import { BASE_URL, IO_URL } from "../../store/global";
   import io from "socket.io-client";
 
-  let socket = null; /* io($IO_URL, {
-          query: {
-            projectId: $currentProjectId,
-            username: $user,
-          },
-        });; */
+  let socket = null;
 
   onMount(async () => {
     try {
@@ -35,7 +30,6 @@
       });
       const result = await response.json();
       if (response.ok) {
-        showToast(result.message, "success");
         socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
@@ -62,21 +56,15 @@
   let savedEdges = [];
   const unsubscribeNodes = nodes.subscribe((updatedNodes) => {
     const updatedPositions = updatedNodes.map((node) => {
-      console.log(
-        `Node ${node.id} position: x=${node.position.x}, y=${node.position.y}`
-      );
-
       return node;
     });
 
     savedNodes = updatedPositions;
-    console.log(savedNodes[0]);
     initialNodes = savedNodes;
   });
 
   const unsubscribeEdges = edges.subscribe((updatedEdges) => {
     savedEdges = updatedEdges;
-    console.log(savedEdges[0]);
     initialEdges = savedEdges;
   });
 
@@ -133,7 +121,6 @@
       });
 
       socket.on("diagram-data", (data) => {
-        console.log(data.nodes);
         if (data && data.nodes && data.edges) {
           initialNodes = data.nodes;
           initialEdges = data.edges;
@@ -191,6 +178,6 @@
       </SvelteFlow>
     </SvelteFlowProvider>
   </div>
-  <Sidebar {initialNodes} {handleDeleteNode} />
+  <NodeSidebar {initialNodes} {handleDeleteNode} />
   <EdgeSidebar {initialEdges} {handleDeleteEdge} />
 </div>

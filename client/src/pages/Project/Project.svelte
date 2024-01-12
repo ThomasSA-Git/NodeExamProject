@@ -4,8 +4,7 @@
   import { user } from "../../store/stores";
   import {
     currentProjectName,
-    currentProjectId,
-    projectUsers,
+    currentProjectId
   } from "../../store/project";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
