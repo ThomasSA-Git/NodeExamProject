@@ -187,7 +187,6 @@
     <SvelteFlowProvider>
       <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
         <Controls />
-        <Background patternColor="#FFFFFF" gap={16} />
         <MiniMap />
       </SvelteFlow>
     </SvelteFlowProvider>

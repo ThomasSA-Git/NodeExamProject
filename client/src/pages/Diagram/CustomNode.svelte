@@ -5,6 +5,7 @@
     useSvelteFlow,
     useNodesData,
   } from "@xyflow/svelte";
+  import { purify } from "../../assets/js/purification.js";
 
   export let id = useNodesData["id"];
   export let data = useNodesData["data"];
@@ -12,11 +13,11 @@
   const { updateNodeData } = useSvelteFlow();
 
   function handleInputLabel(event) {
-    updateNodeData(id, { label: event.target.value, text: data.text });
+    updateNodeData(id, { label: purify(event.target.value), text: purify(data.text) });
   }
 
   function handleInputText(event) {
-    updateNodeData(id, { label: data.label, text: event.target.value });
+    updateNodeData(id, { label: purify(data.label), text: purify(event.target.value) });
   }
 </script>
 
@@ -35,13 +36,13 @@
 <div class="custom">
   <input
     bind:value={data.label}
-    on:input={handleInputLabel}
+    on:change={handleInputLabel}
     placeholder={data.label}
   /><br />
   <textarea
     rows="5"
     bind:value={data.text}
-    on:input={handleInputText}
+    on:change={handleInputText}
     placeholder={data.text}
   />
 </div>

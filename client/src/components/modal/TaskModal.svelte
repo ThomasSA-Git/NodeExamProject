@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import "../../assets/css/taskModal.css";
+  import { purify } from "../../assets/js/purification.js";
   export let addTask;
 
   let taskName = "";
@@ -19,9 +20,9 @@
 
     // Dispatch an event to add the new task to the board
     addTask({
-      name: taskName,
-      description,
-      url,
+      name: purify(taskName),
+      description: purify(description),
+      url: purify(url),
       startDate,
       endDate,
     });

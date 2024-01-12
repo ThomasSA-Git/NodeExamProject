@@ -1,10 +1,11 @@
 import { ObjectId } from "mongodb";
 import db from "./connection.js";
 
+// projects
+
 export const createProject = async (projectName, username) => {
   try {
     const createdAt = Date.now();
-
     const project = {
       projectName,
       users: [username],
@@ -104,6 +105,8 @@ export const deleteProject = async (projectId) => {
   }
 };
 
+// kanban
+
 export const updateKanban = async (projectId, kanban) => {
   try {
     const _id = new ObjectId(projectId);
@@ -119,6 +122,8 @@ export const updateKanban = async (projectId, kanban) => {
     throw err;
   }
 };
+
+// notes
 
 export const createNote = async (projectId, note) => {
   try {
@@ -217,6 +222,8 @@ export const deleteNoteByNoteName = async (projectId, noteName) => {
     throw new Error("Failed to delete note by note name");
   }
 };
+
+// diagram
 
 export const updateDiagram = async (projectId, diagram) => {
   try {

@@ -19,7 +19,6 @@
         return;
       }
   
-      // Dispatches an event to update the task
       updateTask({
         name: updatedTaskName,
         description: updatedDescription,
@@ -27,6 +26,7 @@
         startDate: updatedStartDate,
         endDate: updatedEndDate,
       });
+  
   
       // Close the modal
       dispatch('closeModal');

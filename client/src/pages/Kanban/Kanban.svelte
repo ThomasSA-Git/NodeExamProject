@@ -12,6 +12,7 @@
   import { currentProjectId, currentProjectName } from "../../store/project";
   import { user } from "../../store/stores";
   import { showToast } from "../../assets/js/toast.js";
+  import { purify } from "../../assets/js/purification.js";
   import { navigate } from "svelte-navigator";
 
   let socket = null;
@@ -23,7 +24,7 @@
       });
       const result = await response.json();
       if (response.ok) {
-        showToast(result.message, "success")
+        showToast(result.message, "success");
         socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
@@ -42,13 +43,7 @@
   let kanban = [
     {
       name: "To do",
-      tasks: [
-        {
-          name: "test",
-          description: "test",
-          url: "",
-        },
-      ],
+      tasks: [],
     },
     {
       name: "In progress",
@@ -99,7 +94,7 @@
 
   // Function to handle editing list name
   function handleEditListName(listIndex, newName) {
-    kanban[listIndex].name = newName;
+    kanban[listIndex].name = purify(newName);
     handleSaveKanban();
   }
 
@@ -186,8 +181,6 @@
     });
     socket.on("save-success", (data) => {
       showToast(data.message, "success");
-      //loadKanban()
-      console.log(data);
     });
     socket.on("save-failure", (data) => {
       showToast(data.message, "error");
@@ -231,7 +224,7 @@
           style="font: bold 16px Arial, sans-serif; max-width: 180px"
           bind:value={list.name}
           placeholder={list.name}
-          on:keydown={handleEditListName(listIndex, list.name)}
+          on:change={handleEditListName(listIndex, list.name)}
         />
 
         <button class="delete-button" on:click={() => deleteList(listIndex)}>
