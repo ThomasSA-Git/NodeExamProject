@@ -89,7 +89,7 @@
     };
 
     nodes.update((currentNodes) => [...currentNodes, newNode]);
-    saveDiagram();
+    updateDiagram();
   }
 
   function handleDeleteNode(nodeId) {
@@ -102,7 +102,7 @@
     );
     edges.set(initialEdges);
 
-    saveDiagram();
+    updateDiagram();
   }
 
   function handleDeleteEdge(edgeId) {
@@ -110,7 +110,7 @@
     initialEdges = initialEdges.filter((edge) => edge.id !== edgeId);
     nodes.set(initialNodes);
 
-    saveDiagram();
+    updateDiagram();
   }
 
   function loadDiagram() {
@@ -121,12 +121,15 @@
       });
 
       socket.on("diagram-data", (data) => {
-        if (data && data.nodes && data.edges) {
-          initialNodes = data.nodes;
-          initialEdges = data.edges;
+        if (data.diagram && data.diagram.nodes && data.diagram.edges) {
+          initialNodes = data.diagram.nodes;
+          initialEdges = data.diagram.edges;
 
           nodes.set(initialNodes);
           edges.set(initialEdges);
+          if (data.message != "") {
+            showToast(data.message, "success");
+          }
         }
       });
     } catch (error) {
@@ -144,10 +147,22 @@
       projectId: $currentProjectId,
       username: $user,
     });
-    socket.on("diagram-save-success", (data) => {
+    socket.on("save-success-diagram", (data) => {
       showToast(data.message, "success");
     });
-    socket.on("diagram-save-failure", (data) => {
+  }
+
+  function updateDiagram() {
+    const diagram = {
+      nodes: initialNodes,
+      edges: initialEdges,
+    };
+    socket.emit("update-diagram", {
+      diagram,
+      projectId: $currentProjectId,
+      username: $user,
+    });
+    socket.on("diagram-error", (data) => {
       showToast(data.message, "error");
     });
   }

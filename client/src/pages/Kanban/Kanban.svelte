@@ -66,15 +66,31 @@
       });
 
       socket.on("kanban-data", (data) => {
-        if (data && Array.isArray(data)) {
-          if (data.length > 0) {
-            kanban = data;
+        if (data.kanban && Array.isArray(data.kanban)) {
+          if (data.kanban.length > 0) {
+            kanban = data.kanban;
+            if (data.message != "") {
+              showToast(data.message, "success");
+            }
           }
+        } else {
+          showToast("Loaded data not compatible.", "error");
         }
       });
     } catch (error) {
-      console.error("Error emitting load-kanban event:", error);
+      showToast(error, "error");
     }
+  }
+
+  function handleUpdateKanban() {
+    socket.emit("update-kanban", {
+      kanban,
+      projectId: $currentProjectId,
+      username: $user,
+    });
+    socket.on("kanban-error", (data) => {
+    showToast(data.message, "error");
+  });
   }
 
   function handleSaveKanban() {
@@ -83,13 +99,11 @@
       projectId: $currentProjectId,
       username: $user,
     });
-    socket.on("save-success", (data) => {
+    socket.on("save-success-kanban", (data) => {
       showToast(data.message, "success");
     });
-    socket.on("save-failure", (data) => {
-      showToast(data.message, "error");
-    });
   }
+ 
 
   let hoveringOverList;
 
@@ -121,19 +135,19 @@
 
     // update lists in kanban
     kanban = [...kanban, newList];
-    handleSaveKanban();
+    handleUpdateKanban();
   }
 
   // Function to handle editing list name
   function handleEditListName(listIndex, newName) {
     kanban[listIndex].name = purify(newName);
-    handleSaveKanban();
+    handleUpdateKanban();
   }
 
   function addTask(newTask) {
     // Adds the new task to the first index of the lists array
     kanban[0].tasks = [newTask, ...kanban[0].tasks];
-    handleSaveKanban();
+    handleUpdateKanban();
   }
 
   // Modal logic
@@ -167,7 +181,7 @@
     kanban[listIndexToUpdate].tasks[updateTaskIndex] = updatedTask;
 
     kanban = [...kanban];
-    handleSaveKanban();
+    handleUpdateKanban();
     closeUpdateModal();
   }
 
@@ -175,17 +189,18 @@
     kanban[listIndex].tasks.splice(taskIndex, 1);
     // Updates tasks on lists array to trigger reactivity
     kanban = [...kanban];
-    handleSaveKanban();
+    handleUpdateKanban();
   }
 
   function deleteList(listIndex) {
     kanban.splice(listIndex, 1);
     // Updates lists array to trigger reactivity
     kanban = [...kanban];
-    handleSaveKanban();
+    handleUpdateKanban();
   }
 
   onDestroy(() => {
+    handleSaveKanban();
     socket.emit("leave-room", { projectId: $currentProjectId });
   });
 
