@@ -16,11 +16,11 @@ app.use(
 import http from "http";
 const server = http.createServer(app);
 
-
-
+// enable security headers using Helmet middleware
 import helmet from "helmet";
 app.use(helmet());
 
+// socket.io setup with initialization of server
 import { Server } from "socket.io";
 const io = new Server(server, {
   cors: {
@@ -48,20 +48,20 @@ app.use(express.json());
 import rateLimit from "express-rate-limit";
 
 const allRoutesRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 200, // Limit each IP to 200 requests per `window` (here, per 15 minutes).
-  standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  windowMs: 15 * 60 * 1000,
+  limit: 200,
+  standardHeaders: "draft-7", 
+  legacyHeaders: false,
 });
 
 app.use(allRoutesRateLimiter);
 
 // Rate limiter specific for login. Overrides the above for the specific path as set below.
 const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 5, // Limit each IP to 5 requests per `window` (here, per 15 minutes).
-  standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  windowMs: 15 * 60 * 1000,
+  limit: 5, 
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
 });
 
 // Router import

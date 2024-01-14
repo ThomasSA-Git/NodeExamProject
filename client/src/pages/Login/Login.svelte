@@ -1,5 +1,5 @@
 <script>
-  import { user, role } from "../../store/stores.js";
+  import { user } from "../../store/stores.js";
   import { BASE_URL } from "../../store/global.js";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
@@ -28,17 +28,12 @@
         // Handle successful login
         const userData = await response.json();
         $user = userData.username;
-        $role = userData.role;
         localStorage.setItem("user", JSON.stringify(userData));
         showToast("Login successful. Redirecting to user page.", "success");
 
-        // Redirect depending on role
+        // Redirect
         setTimeout(() => {
-          if ($role === "admin") {
-            navigate("/adminpage");
-          } else {
-            navigate("/userpage");
-          }
+          navigate("/userpage");
         }, 2000);
       } else {
         // Handle failed login
@@ -46,12 +41,12 @@
         // make the below a toast instead
         const errorMessage =
           errorData.error || "Login failed. Please check your credentials.";
-          showToast(errorMessage, 'error');
+        showToast(errorMessage, "error");
         username = "";
         password = "";
       }
-    } catch (error) {      
-      showToast(`Login failed. Error: ${error.message}`, 'error');
+    } catch (error) {
+      showToast(`Login failed. Error: ${error.message}`, "error");
       username = "";
       password = "";
     }
@@ -62,15 +57,14 @@
   }
 </script>
 
-
 <h1>Login</h1>
 
 <form on:submit|preventDefault={handleSubmit}>
   <label for="username">Username:</label>
-  <input type="text" id="username" bind:value={username} required/>
+  <input type="text" id="username" bind:value={username} required />
 
   <label for="password">Password:</label>
-  <input type="password" id="password" bind:value={password} required/>
+  <input type="password" id="password" bind:value={password} required />
 
   <button type="submit">Login</button>
 </form>

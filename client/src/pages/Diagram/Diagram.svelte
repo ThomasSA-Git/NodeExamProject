@@ -20,6 +20,7 @@
   import { user } from "../../store/stores";
   import { BASE_URL, IO_URL } from "../../store/global";
   import io from "socket.io-client";
+  import { getSocket } from '../../util/socketService';
 
   let socket = null;
 
@@ -30,12 +31,14 @@
       });
       const result = await response.json();
       if (response.ok) {
-        socket = io($IO_URL, {
+        socket = getSocket();
+        /* socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
             username: $user,
           },
-        });
+        }); */
+        joinRoom(result.projectId);
         loadDiagram();
       } else {
         showToast(result.message, "error");
@@ -44,6 +47,10 @@
       showToast(error.message, "error");
     }
   });
+
+  function joinRoom(projectId){
+    socket.emit("join-room", {projectId});
+  }
 
   let initialNodes = [];
   let initialEdges = [];
@@ -108,7 +115,7 @@
   function handleDeleteEdge(edgeId) {
     // remove the node with the given ID from the list of nodes
     initialEdges = initialEdges.filter((edge) => edge.id !== edgeId);
-    nodes.set(initialNodes);
+    edges.set(initialEdges);
 
     updateDiagram();
   }
@@ -171,7 +178,7 @@
     saveDiagram();
     unsubscribeNodes();
     unsubscribeEdges();
-    socket.emit("leave-room", { projectId: $currentProjectId });
+    socket.emit("leave-room");
   });
 </script>
 

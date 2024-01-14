@@ -1,5 +1,5 @@
 <script>
-  import { Router, Link, Route } from "svelte-navigator";
+  import { Router, Link, Route, navigate } from "svelte-navigator";
   import Home from "./pages/Home/Home.svelte";
   import Login from "./pages/Login/Login.svelte";
   import Signup from "./pages/Signup/Signup.svelte";
@@ -9,12 +9,16 @@
   import Kanban from "./pages/Kanban/Kanban.svelte";
   import Project from "./pages/Project/Project.svelte";
   import NoteSystem from "./pages/NoteSystem/NoteSystem.svelte";
-  import { user, role } from "./store/stores.js";
+  import { user } from "./store/stores.js";
+  import { currentProjectId, currentProjectName } from "./store/project.js";
   import { url } from "./util/apiUrl";
+  import { BASE_URL } from "./store/global.js";
   import Diagram from "./pages/Diagram/Diagram.svelte";
   import NoteOverview from "./pages/NoteOverview/NoteOverview.svelte";
+  import { getSocket, disconnectSocket } from "./util/socketService.js";
 
   import { onMount } from "svelte";
+  import { showToast } from "./assets/js/toast";
 
   onMount(() => {
     // Check for user in localStorage
@@ -22,16 +26,29 @@
     if (storedUser) {
       const userData = JSON.parse(storedUser);
       user.set(userData.username);
-      role.set(userData.role);
     }
   });
 
   async function handleLogout() {
-    await fetch(url + "auth/logout", {
-      credentials: "include",
-    });
-    $user = null;
-    localStorage.clear();
+    try {
+      disconnectSocket();
+      const response = await fetch($BASE_URL + "/auth/logout", {
+        credentials: "include",
+      });
+      
+      if(response.ok){
+      $user = null;
+      $currentProjectId = null;
+      $currentProjectName = null;
+      localStorage.clear();
+      navigate("/home");
+    }
+    else {
+      showToast("Not logged out", "error");
+    }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   }
 </script>
 
@@ -39,8 +56,8 @@
   <nav>
     <Link to="/">Home</Link>
     {#if $user != null}
-    <Link to="/userpage">User start</Link>
-  {/if}
+      <Link to="/userpage">User start</Link>
+    {/if}
 
     {#if $user == null}
       <Link to="/login">Login</Link><br />
@@ -73,14 +90,3 @@
     </PrivateRoute>
   </div>
 </Router>
-
-<style>
-  .logout-button {
-    color: white;
-    background-color: red;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-</style>

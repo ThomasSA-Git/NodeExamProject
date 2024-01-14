@@ -72,7 +72,9 @@ router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
     await Promise.all(
       users.map((user) => removeProjectIdFromUser(user, projectId))
     );
-    res.status(200).send({ message: `Project deleted successfully. Redirecting` });
+    res
+      .status(200)
+      .send({ message: `Project deleted successfully. Redirecting` });
   } catch (error) {
     console.error("Error in delete project", error);
     res.status(500).json({ error: "Internal server error" });

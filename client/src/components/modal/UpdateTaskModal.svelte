@@ -14,11 +14,12 @@
     const dispatch = createEventDispatcher();
   
     function handleSubmit() {
+        // validate required input fields. Event below will not be dispatched if they're not
       if (!updatedTaskName || !updatedStartDate || !updatedEndDate) {
         
         return;
       }
-  
+      // use updateTask in parent
       updateTask({
         name: updatedTaskName,
         description: updatedDescription,
@@ -28,7 +29,7 @@
       });
   
   
-      // Close the modal
+      // Close the modal after updating task
       dispatch('closeModal');
     }
   

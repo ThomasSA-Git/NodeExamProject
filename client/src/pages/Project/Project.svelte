@@ -13,6 +13,8 @@
   import * as d3 from "d3";
   import { IO_URL } from "../../store/global";
   import io from "socket.io-client";
+  // addition for socket connection
+  import { getSocket, initializeSocket } from '../../util/socketService';
 
   let socket = null;
 
@@ -34,12 +36,14 @@
 
       if (response.ok) {
         const result = await response.json();
-        socket = io($IO_URL, {
+        socket = initializeSocket($IO_URL);
+        socket = getSocket();
+         /* socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
             username: $user,
           },
-        });
+        }); */
         kanban = result.projectData.kanban;
         taskSum = kanban.reduce(
           (accumulator, current) => accumulator + current.taskCount,
@@ -125,11 +129,6 @@
     });
   }
 
-  onDestroy(() => {
-    // Leave the room based on currentProjectId
-    socket.emit("leave-room", { projectId: $currentProjectId });
-  });
-
   // chart logic -----------------------------
   const formatLabel = d3.format(",.0f");
 
@@ -163,6 +162,11 @@
   function handleNavigate(path) {
     navigate(path);
   }
+
+  onDestroy(() => {
+    // Leave the room based on currentProjectId
+    socket.emit("leave-room");
+  });
 </script>
 
 <h2>Dashboard for: {$currentProjectName}</h2>

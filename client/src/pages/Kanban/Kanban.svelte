@@ -1,7 +1,5 @@
 <script>
   // @ts-nocheck
-
-  import { flip } from "svelte/animate";
   import "../../assets/css/kanban.css";
   import "../../assets/css/toast.css";
   import TaskModal from "../../components/modal/TaskModal.svelte";
@@ -14,6 +12,8 @@
   import { showToast } from "../../assets/js/toast.js";
   import { purify } from "../../assets/js/purification.js";
   import { navigate } from "svelte-navigator";
+  // addition for socket
+  import { getSocket } from "../../util/socketService";
 
   let socket = null;
 
@@ -24,12 +24,14 @@
       });
       const result = await response.json();
       if (response.ok) {
-        socket = io($IO_URL, {
+        socket = getSocket();
+        /*       socket = io($IO_URL, {
           query: {
             projectId: $currentProjectId,
             username: $user,
           },
-        });
+        }); */
+        joinRoom(result.projectId);
         loadKanban();
       } else {
         showToast(result.message, "error");
@@ -38,7 +40,7 @@
       showToast(error.message, "error");
     }
   });
-
+  // default kanban when none is created yet
   let kanban = [
     {
       name: "To do",
@@ -58,6 +60,7 @@
     },
   ];
 
+  // load kanban from project
   function loadKanban() {
     try {
       socket.emit("load-kanban", {
@@ -82,6 +85,7 @@
     }
   }
 
+  // update kanban for each client in the same project room
   function handleUpdateKanban() {
     socket.emit("update-kanban", {
       kanban,
@@ -89,10 +93,11 @@
       username: $user,
     });
     socket.on("kanban-error", (data) => {
-    showToast(data.message, "error");
-  });
+      showToast(data.message, "error");
+    });
   }
 
+  // save kanban upon exit
   function handleSaveKanban() {
     socket.emit("save-kanban", {
       kanban,
@@ -103,28 +108,33 @@
       showToast(data.message, "success");
     });
   }
- 
 
-  let hoveringOverList;
+  function joinRoom(projectId) {
+    socket.emit("join-room", { projectId });
+  }
 
-  let listIndexToUpdate;
-
+  // Drag start event for tasks
   function dragStart(event, listIndex, taskIndex) {
+    // Create a data object with listIndex and taskIndex
     const data = { listIndex, taskIndex };
+    // Set the drag-and-drop data with the JSON-serialized data object
     event.dataTransfer.setData("text/plain", JSON.stringify(data));
   }
 
+  // Drop event for tasks
   function drop(event, listIndex) {
     event.preventDefault();
+    // get the JSON-serialized data from the drag-and-drop data
     const json = event.dataTransfer.getData("text/plain");
     const data = JSON.parse(json);
 
+    // get the task from the original list and update the Kanban board
     const [task] = kanban[data.listIndex].tasks.splice(data.taskIndex, 1);
 
+    // Add the task to the new list and trigger a Kanban board update
     kanban[listIndex].tasks.push(task);
     kanban = kanban;
-    handleSaveKanban();
-    hoveringOverList = null;
+    handleUpdateKanban();
   }
 
   function handleAddList() {
@@ -144,13 +154,7 @@
     handleUpdateKanban();
   }
 
-  function addTask(newTask) {
-    // Adds the new task to the first index of the lists array
-    kanban[0].tasks = [newTask, ...kanban[0].tasks];
-    handleUpdateKanban();
-  }
-
-  // Modal logic
+  // Modal logic for add task
   let isModalOpen = false;
 
   function openModal() {
@@ -161,8 +165,17 @@
     isModalOpen = false;
   }
 
+  function addTask(newTask) {
+    // adds the new task to the first index of the lists array
+    kanban[0].tasks = [newTask, ...kanban[0].tasks];
+    handleUpdateKanban();
+  }
+
+  // modal logic for update task
   let isUpdateModalOpen = false;
+
   let taskToUpdate;
+  let listIndexToUpdate;
   let updateTaskIndex;
 
   function openUpdateModal(listIndex, taskIndex, task) {
@@ -177,7 +190,7 @@
   }
 
   function updateTask(updatedTask) {
-    // Updates the task in the correct list and at the correct index
+    // updates the task in the correct list and at the correct index
     kanban[listIndexToUpdate].tasks[updateTaskIndex] = updatedTask;
 
     kanban = [...kanban];
@@ -185,23 +198,25 @@
     closeUpdateModal();
   }
 
+  // delete functions for task and list
   function deleteTask(listIndex, taskIndex) {
     kanban[listIndex].tasks.splice(taskIndex, 1);
-    // Updates tasks on lists array to trigger reactivity
+    // updates tasks on lists array to trigger reactivity
     kanban = [...kanban];
     handleUpdateKanban();
   }
 
   function deleteList(listIndex) {
     kanban.splice(listIndex, 1);
-    // Updates lists array to trigger reactivity
+    // updates lists array to trigger reactivity
     kanban = [...kanban];
     handleUpdateKanban();
   }
 
+  // on destroy / leaving page kanban is saved and client leaves room
   onDestroy(() => {
     handleSaveKanban();
-    socket.emit("leave-room", { projectId: $currentProjectId });
+    socket.emit("leave-room");
   });
 
   function handleNavigate(path) {
@@ -232,7 +247,7 @@
 <div class="kan-container">
   <div style="display: flex; gap: 20px; overflow-x: auto;">
     {#each kanban as list, listIndex (list)}
-      <div animate:flip class="kan-col">
+      <div class="kan-col">
         <input
           style="font: bold 16px Arial, sans-serif; max-width: 180px"
           bind:value={list.name}
@@ -249,15 +264,12 @@
         </button>
         <hr />
         <ul
-          class:hovering={hoveringOverList === list.name}
-          on:dragenter={() => (hoveringOverList = list.name)}
-          on:dragleave={() => (hoveringOverList = null)}
           on:drop={(event) => drop(event, listIndex)}
           ondragover="return false"
           style="list-style-type: none; padding: 0; height: 420px; overflow-y: auto;"
         >
           {#each list.tasks as task, taskIndex (task)}
-            <div class="task" animate:flip>
+            <div class="task">
               <li
                 class="task-content"
                 draggable={true}

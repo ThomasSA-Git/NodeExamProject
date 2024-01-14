@@ -44,7 +44,7 @@ router.post("/api/auth/login", async (req, res) => {
       // Store user information in the session
       req.session.user = user;
       // Send username and role to use for auth clientside.
-      res.json({
+      res.status(200).send({
         username: req.session.user.username,
         role: req.session.user.role,
       });
@@ -79,14 +79,13 @@ router.post("/api/auth/register", async (req, res) => {
     const mailMessage = registerMailMessage(username);
     sendEmail(email, registerMailSubject, mailMessage);
 
-    res.json({ message: "Registration successful. Redirecting to login." });
+    res.status(201).send({ message: "Registration successful. Redirecting to login." });
   }
 });
 
 router.get("/api/auth/logout", (req, res) => {
   // delete session
   delete req.session.user;
-  sessionUser = undefined;
   res.send({ data: "You're logged out." });
 });
 
@@ -112,13 +111,13 @@ router.post("/api/auth/getSecretToken", async (req, res) => {
 
       res
         .status(200)
-        .json({ message: "Password reset token sent successfully." });
+        .send({ message: "Password reset token sent successfully." });
     } else {
-      res.status(404).json({ error: "User not found." });
+      res.status(404).send({ error: "User not found." });
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).send({ error: "Internal server error." });
   }
 });
 
@@ -136,20 +135,21 @@ router.post("/api/auth/resetPassword", async (req, res) => {
       await updateUserPassword(username, hashedNewPassword);
       // deletes token used for update of password
       await deleteUserTokenByUsername(username);
-      res.status(200).json({ message: "Password reset successful." });
+      res.status(200).send({ message: "Password reset successful." });
     } else {
-      res.status(401).json({ error: "Invalid token or username." });
+      res.status(401).send({ error: "Invalid token or username." });
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).send({ error: "Internal server error." });
   }
 });
 
 router.use(isAuthenticated);
 
 router.get("/api/auth/authSocket", isAuthenticated, (req, res) => {
-  res.status(200).send({ message: "Loading data" });
+  const projectId = req.session.projectId;
+  res.status(200).send({ message: "Loading data", projectId });
 });
 
 export default router;

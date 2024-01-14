@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import "../../assets/css/taskModal.css";
   import { purify } from "../../assets/js/purification.js";
+  // prop from parent, allows
   export let addTask;
 
   let taskName = "";
@@ -10,15 +11,16 @@
   let startDate = "";
   let endDate = "";
 
+  // used to communicate with parent and trigger event/function
   const dispatch = createEventDispatcher();
+
   function handleSubmit() {
-    // Validate input fields
+    // validate required input fields. Event below will not be dispatched if they're not
     if (!taskName || !startDate || !endDate) {
-      
       return;
     }
 
-    // Dispatch an event to add the new task to the board
+    // use addTask in parent
     addTask({
       name: purify(taskName),
       description: purify(description),
@@ -27,19 +29,19 @@
       endDate,
     });
 
-    // Clear input fields
+    // clear input fields after adding task
     taskName = "";
     description = "";
     url = "";
     startDate = "";
     endDate = "";
 
-    // Close the modal
+    // closes the modal after adding task
     dispatch('closeModal');
   }
 
   function handleClose() {
-    // Clear input fields and close the modal without adding the task
+    // clears input fields and close the modal without adding the task
     taskName = "";
     description = "";
     url = "";
