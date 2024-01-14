@@ -43,18 +43,17 @@ router.post("/api/auth/login", async (req, res) => {
     if (match) {
       // Store user information in the session
       req.session.user = user;
-      // Send username and role to use for auth clientside.
+      
       res.status(200).send({
-        username: req.session.user.username,
-        role: req.session.user.role,
+        username: req.session.user.username
       });
     } else {
       // Send a 401 status for incorrect password
-      res.status(401).json({ error: "Invalid password." });
+      res.status(401).send({ error: "Invalid password." });
     }
   } else {
     // Send a 401 status for invalid username
-    res.status(401).json({ error: "Invalid username." });
+    res.status(401).send({ error: "Invalid username." });
   }
 });
 
@@ -70,7 +69,7 @@ router.post("/api/auth/register", async (req, res) => {
   const userExists = await findUserByUsername(username);
 
   if (userExists) {
-    res.status(401).json({ error: "Username is taken" });
+    res.status(401).send({ error: "Username is taken" });
   } else {
     // Create user in mongodb
     createUser(purifiedUsername, purifiedEmail, hashedPassword);

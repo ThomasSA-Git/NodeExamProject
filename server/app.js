@@ -29,7 +29,7 @@ const io = new Server(server, {
   },
 });
 
-import sockets from './sockets/sockets.js';
+import sockets from "./sockets/sockets.js";
 sockets(io);
 
 import session from "express-session";
@@ -38,7 +38,10 @@ const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false },
+  cookie: {
+    secure: false,
+    maxAge: 60 * 60 * 1000, // expires after an hour
+  },
 });
 
 app.use(sessionMiddleware);
@@ -50,7 +53,7 @@ import rateLimit from "express-rate-limit";
 const allRoutesRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 200,
-  standardHeaders: "draft-7", 
+  standardHeaders: "draft-7",
   legacyHeaders: false,
 });
 
@@ -59,7 +62,7 @@ app.use(allRoutesRateLimiter);
 // Rate limiter specific for login. Overrides the above for the specific path as set below.
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 5, 
+  limit: 5,
   standardHeaders: "draft-7",
   legacyHeaders: false,
 });
@@ -74,7 +77,6 @@ app.use(projectRouter);
 
 import noteRouter from "./routers/noteRouter.js";
 app.use(noteRouter);
-
 
 const PORT = process.env.PORT || 8080;
 

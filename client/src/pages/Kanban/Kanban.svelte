@@ -25,13 +25,6 @@
       const result = await response.json();
       if (response.ok) {
         socket = getSocket();
-        /*       socket = io($IO_URL, {
-          query: {
-            projectId: $currentProjectId,
-            username: $user,
-          },
-        }); */
-        joinRoom(result.projectId);
         loadKanban();
       } else {
         showToast(result.message, "error");
@@ -65,7 +58,6 @@
     try {
       socket.emit("load-kanban", {
         projectId: $currentProjectId,
-        username: $user,
       });
 
       socket.on("kanban-data", (data) => {
@@ -107,10 +99,6 @@
     socket.on("save-success-kanban", (data) => {
       showToast(data.message, "success");
     });
-  }
-
-  function joinRoom(projectId) {
-    socket.emit("join-room", { projectId });
   }
 
   // Drag start event for tasks
@@ -213,10 +201,9 @@
     handleUpdateKanban();
   }
 
-  // on destroy / leaving page kanban is saved and client leaves room
+  // on destroy
   onDestroy(() => {
     handleSaveKanban();
-    socket.emit("leave-room");
   });
 
   function handleNavigate(path) {

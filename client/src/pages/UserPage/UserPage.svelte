@@ -8,6 +8,7 @@
   import { showToast } from "../../assets/js/toast.js";
   import { navigate } from "svelte-navigator";
   import { paginate, LightPaginationNav } from "svelte-paginate";
+  import { disconnectSocket } from "../../util/socketService.js";
 
   let data = [];
 
@@ -20,11 +21,10 @@
 
   let newProjectName;
 
-  onMount(async () => {
-    loadProjects();
-  });
+  onMount(loadProjects);
 
   async function loadProjects() {
+    disconnectSocket();
     try {
       const response = await fetch(
         $BASE_URL + `/projects`,

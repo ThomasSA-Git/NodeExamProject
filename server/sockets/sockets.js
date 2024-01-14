@@ -15,24 +15,27 @@ import {
 import { purifyKanbanList } from "../util/DOMpurify.js";
 
 export default (io) => {
-  io.on("connection", (socket) => {
-    // kanban sockets
+  io.on("connection", async (socket) => {
+    
+    // join project room with projectId
+    const projectId = await socket.handshake.query.projectId;
+    socket.join(projectId);
+
+    // kanban sockets 
     socket.on("update-kanban", async (data) => {
       try {
         const projectId = data.projectId;
         const updatedKanban = data.kanban.map(purifyKanbanList);
         const result = await updateKanban(projectId, updatedKanban);
         if (result.acknowledged && result.matchedCount) {
-        // Emit the updated kanban to all clients in the same room, excluding this client
-        socket.broadcast.to(projectId).emit("kanban-data", {
-          kanban: updatedKanban,
-          message: "Kanban updated",
-        });
-      } else {
-        socket.emit("kanban-error", { message: "Kanban save failed" });
-      }
-        // below updated for all in the same room including client
-        //io.to(projectId).emit("kanban-data", { kanban: updatedProject.kanban, message: "Kanban updated" });
+          // Emit the updated kanban to all clients in the same room, excluding this client
+          socket.broadcast.to(projectId).emit("kanban-data", {
+            kanban: updatedKanban,
+            message: "Kanban updated",
+          });
+        } else {
+          socket.emit("kanban-error", { message: "Kanban save failed" });
+        }
       } catch (error) {
         socket.emit("kanban-error", { message: `Error: ${error}` });
       }
@@ -92,16 +95,16 @@ export default (io) => {
         const projectId = data.projectId;
         const result = await updateDiagram(projectId, diagram);
         if (result.acknowledged && result.matchedCount) {
-        // emit the updated diagram to all clients in the same room, except this client
-        socket.broadcast.to(projectId).emit("diagram-data", {
-          diagram: diagram,
-          message: "Diagram updated",
-        });
-      } else {
-        socket.emit("diagram-error", {
-          message: "Diagram update failed",
-        });
-      }
+          // emit the updated diagram to all clients in the same room, except this client
+          socket.broadcast.to(projectId).emit("diagram-data", {
+            diagram: diagram,
+            message: "Diagram updated",
+          });
+        } else {
+          socket.emit("diagram-error", {
+            message: "Diagram update failed",
+          });
+        }
       } catch (error) {
         socket.emit("diagram-error", { message: `Error: ${error}` });
       }
@@ -111,7 +114,7 @@ export default (io) => {
         const diagram = data.diagram;
         const projectId = data.projectId;
         const result = await updateDiagram(projectId, diagram);
-        if (result.acknowledged && result.matchedCount) { 
+        if (result.acknowledged && result.matchedCount) {
           socket.emit("save-success-diagram", { message: "Diagram saved" });
         } else {
           socket.emit("diagram-error", {
@@ -130,7 +133,7 @@ export default (io) => {
         if (userExists === null) {
           socket.emit("find-user-error", { message: "User not found" });
         } else {
-          socket.emit("find-user-result", { username: user.username });
+          socket.emit("find-user-result");
         }
       } catch (error) {
         socket.emit("find-user-result", { message: `Error: ${error}` });
@@ -178,19 +181,8 @@ export default (io) => {
       }
     });
 
-    socket.on("join-room", (data) => {
-      const projectId = data.projectId;
-      socket.join(projectId);
-    })
-
-    socket.on("leave-room", () => {
-      socket.rooms.forEach((room) => {
-        socket.leave(room);
-      });
-    });
-
     socket.on("terminate", () => {
       socket.disconnect();
-    })
+    });
   });
 };

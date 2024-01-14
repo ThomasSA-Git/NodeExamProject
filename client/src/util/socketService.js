@@ -2,9 +2,14 @@ import io from "socket.io-client";
 
 let socket = null;
 
-export const initializeSocket = (IO_URL) => {
+export const initializeSocket = (IO_URL, projectId) => {
   if (!socket) {
-    socket = io(IO_URL);
+    socket = io(IO_URL, {
+      query: {
+        projectId: projectId,
+      },
+    });
+
 
     // Return a promise that resolves when the socket is connected
     return new Promise((resolve) => {

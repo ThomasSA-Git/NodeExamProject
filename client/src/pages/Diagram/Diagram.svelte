@@ -32,13 +32,6 @@
       const result = await response.json();
       if (response.ok) {
         socket = getSocket();
-        /* socket = io($IO_URL, {
-          query: {
-            projectId: $currentProjectId,
-            username: $user,
-          },
-        }); */
-        joinRoom(result.projectId);
         loadDiagram();
       } else {
         showToast(result.message, "error");
@@ -47,10 +40,6 @@
       showToast(error.message, "error");
     }
   });
-
-  function joinRoom(projectId){
-    socket.emit("join-room", {projectId});
-  }
 
   let initialNodes = [];
   let initialEdges = [];
@@ -178,7 +167,6 @@
     saveDiagram();
     unsubscribeNodes();
     unsubscribeEdges();
-    socket.emit("leave-room");
   });
 </script>
 

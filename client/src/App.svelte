@@ -11,11 +11,10 @@
   import NoteSystem from "./pages/NoteSystem/NoteSystem.svelte";
   import { user } from "./store/stores.js";
   import { currentProjectId, currentProjectName } from "./store/project.js";
-  import { url } from "./util/apiUrl";
   import { BASE_URL } from "./store/global.js";
   import Diagram from "./pages/Diagram/Diagram.svelte";
   import NoteOverview from "./pages/NoteOverview/NoteOverview.svelte";
-  import { getSocket, disconnectSocket } from "./util/socketService.js";
+  import { disconnectSocket } from "./util/socketService.js";
 
   import { onMount } from "svelte";
   import { showToast } from "./assets/js/toast";
@@ -41,7 +40,7 @@
       $currentProjectId = null;
       $currentProjectName = null;
       localStorage.clear();
-      navigate("/home");
+      navigate("/");
     }
     else {
       showToast("Not logged out", "error");

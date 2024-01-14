@@ -2,10 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { BASE_URL } from "../../store/global";
   import { user } from "../../store/stores";
-  import {
-    currentProjectName,
-    currentProjectId
-  } from "../../store/project";
+  import { currentProjectName, currentProjectId } from "../../store/project";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
   import "../../assets/css/project.css";
@@ -14,7 +11,7 @@
   import { IO_URL } from "../../store/global";
   import io from "socket.io-client";
   // addition for socket connection
-  import { getSocket, initializeSocket } from '../../util/socketService';
+  import { getSocket, initializeSocket } from "../../util/socketService";
 
   let socket = null;
 
@@ -36,14 +33,8 @@
 
       if (response.ok) {
         const result = await response.json();
-        socket = initializeSocket($IO_URL);
+        initializeSocket($IO_URL, $currentProjectId);
         socket = getSocket();
-         /* socket = io($IO_URL, {
-          query: {
-            projectId: $currentProjectId,
-            username: $user,
-          },
-        }); */
         kanban = result.projectData.kanban;
         taskSum = kanban.reduce(
           (accumulator, current) => accumulator + current.taskCount,
@@ -162,11 +153,6 @@
   function handleNavigate(path) {
     navigate(path);
   }
-
-  onDestroy(() => {
-    // Leave the room based on currentProjectId
-    socket.emit("leave-room");
-  });
 </script>
 
 <h2>Dashboard for: {$currentProjectName}</h2>
@@ -244,7 +230,11 @@
     <div class="add-user">
       <h3>Search user to add:</h3>
       <div class="input-container">
-        <input type="text" on:keyup={handleSearchUser} bind:value={searchUser} />
+        <input
+          type="text"
+          on:keyup={handleSearchUser}
+          bind:value={searchUser}
+        />
         {#if userFound && searchUser != ""}
           <button on:click={handleAddUser}>Add</button>
         {/if}
@@ -269,7 +259,7 @@
 
 <!-- style set here for rect to override the background color of diagram -->
 <style>
-   rect {
+  rect {
     fill: blue;
   }
 </style>
