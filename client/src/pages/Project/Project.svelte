@@ -98,7 +98,7 @@
     });
     socket.on("add-user-success", (data) => {
       showToast(data.message, "success");
-      users = [...users, searchUser];
+      users = [...users, data.user];
       searchUser = "";
     });
     socket.on("add-user-error", (data) => {
@@ -113,7 +113,7 @@
     });
     socket.on("remove-user-success", (data) => {
       showToast(data.message, "success");
-      users = users.filter((user) => user !== username);
+      users = users.filter((user) => user !== data.user);
     });
     socket.on("remove-user-error", (data) => {
       showToast(data.message, "error");
@@ -224,7 +224,7 @@
     {/if}
   </div>
 
-  <div class="container">
+  <div class="container" style="border-left: 1px solid #000;">
     <h2>Add users and list of users</h2>
 
     <div class="add-user">
@@ -254,9 +254,8 @@
         </tr>
       {/each}
     </div>
-  </div>
+  </div>  
 </div>
-
 <!-- style set here for rect to override the background color of diagram -->
 <style>
   rect {

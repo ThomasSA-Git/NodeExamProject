@@ -6,19 +6,23 @@
   import Alert from "editorjs-alert";
   import List from "@editorjs/list";
   import Alignment from "editorjs-text-alignment-blocktune";
-  import { onMount } from "svelte";
-  import { BASE_URL } from "../../store/global";
-  import { currentNoteName } from "../../store/project";
+  import { onMount, onDestroy } from "svelte";
+  import { BASE_URL } from "../../store/global.js";
+  import { user } from "../../store/stores.js";
+  import { currentNoteName, currentProjectId } from "../../store/project.js";
   import { showToast } from "../../assets/js/toast.js";
   import "../../assets/css/toast.css";
   import "../../assets/css/noteSystem.css";
   import { navigate } from "svelte-navigator";
+  import { getSocket } from "../../util/socketService";
 
   let editor;
 
   onMount(loadData);
 
   let noteData;
+
+  let socket;
 
   function initializeEditor() {
     editor = new EditorJS({
@@ -47,12 +51,15 @@
         credentials: "include",
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+        showToast(result.message, "error");
+      } else {
+        const result = await response.json();
+        noteData = result[0].note;
+        socket = getSocket();
+        initializeEditor();
+        adjustCounterUp();
       }
-
-      const data = await response.json();
-      noteData = data[0].note;
-      initializeEditor();
     } catch (error) {
       showToast(error, "error");
     }
@@ -104,9 +111,35 @@
     }
   }
 
+  function adjustCounterUp() {
+    socket.emit("add-to-counter", {
+      noteName: $currentNoteName,
+      projectId: $currentProjectId,
+      username: $user,
+    });
+    socket.on("user-editing", (data) => {
+      showToast(data.message, "info");
+    });
+  }
+  function adjustCounterDown() {
+    socket.emit("subtract-from-counter", {
+      noteName: $currentNoteName,
+      projectId: $currentProjectId,
+      username: $user,
+    });
+    socket.on("user-stopped-editing", (data) => {
+      showToast(data.message, "info");
+    });
+  }
+
   function handleNavigate() {
     navigate("/noteOverview");
   }
+
+  onDestroy(() => {
+    handleUpdate();
+    adjustCounterDown();
+  });
 </script>
 
 <div>

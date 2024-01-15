@@ -174,7 +174,7 @@
   <button on:click={handleAddNode}>Add node</button>
   <button on:click={saveDiagram}>Save diagram</button>
   <button class="navigate-button" on:click={() => navigate("/project")}
-    >Back to project</button
+    >Dashboard</button
   >
   <hr />
 </div>

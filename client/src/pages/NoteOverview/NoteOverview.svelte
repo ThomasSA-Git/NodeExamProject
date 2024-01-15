@@ -50,16 +50,15 @@
       });
 
       if (response.ok) {
-        const responseData = await response.json();
-        items = responseData.data;
+        const result = await response.json();
+        items = result.data;
         items.reverse();
       } else {
-        const errorData = await response.json();
-        const errorMessage = errorData.error || "Failed to fetch note data.";
-        showToast(errorMessage, "error");
+        const result = await response.json();
+        showToast(result.message, "error");
       }
     } catch (error) {
-      showToast("An error occurred.", "error");
+      showToast("An error occurred during load.", "error");
     }
   }
 
@@ -104,7 +103,7 @@
         if (result.created) {
           $currentNoteName = newNoteName;
           newNoteName = "";
-          //navigation and reset of newNoteName not working. FIXXX!!!!!!
+
           navigate("/notes");
         } else {
           showToast(result.message, "error");
@@ -124,8 +123,10 @@
       year: "numeric",
     });
   }
-
-
+  
+ function isBeingEdited(editorCounter) {
+    return editorCounter !== null && editorCounter !== undefined && editorCounter > 0;
+  }
 
   function handleNavigate(noteName) {
     $currentNoteName = noteName;
@@ -145,6 +146,7 @@
       <tr>
         <th on:click={() => sortBy("noteName")}>Note Name</th>
         <th on:click={() => sortBy("createdAt")}>Created at</th>
+        <th>Being edited</th>
       </tr>
     </thead>
     <tbody>
@@ -152,6 +154,7 @@
         <tr class="item" on:click={() => handleNavigate(item.noteName)}>
           <td>{item.noteName}</td>
           <td style="max-width: 100px;">{handleDate(item.note.time)}</td>
+          <td>{isBeingEdited(item.editorCounter)}</td>
         </tr>
       {/each}
     </tbody>
@@ -168,5 +171,5 @@
   on:setPage={(e) => (currentPage = e.detail.page)}
 />
 <button class="navigate-button" on:click={() => navigate("/project")}
-  >Back to project</button
+  >Dashboard</button
 >

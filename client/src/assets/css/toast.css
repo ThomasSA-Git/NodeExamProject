@@ -21,3 +21,9 @@
     background-color: #f44336;
     color: #fff;
   }
+
+  /* info style */
+  .toast-info {
+    background-color: lightgray;
+    color: black;
+  }

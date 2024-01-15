@@ -4,8 +4,6 @@
     width: 50%;
     height: 440px;
     padding: 10px;
-    border: 3px solid #ccc;
-    border-radius: 20px;
     margin: 20px;
   }
 
@@ -49,4 +47,17 @@
   .user-table {
     overflow-y: scroll;
     min-height: 250px;
+  }
+
+  .vertical-line {
+    position: relative;
+  }
+  
+  .vertical-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%; /* Adjust the left position to move the line horizontally */
+    border-left: 2px solid #000; /* Adjust the border properties as needed */
   }
