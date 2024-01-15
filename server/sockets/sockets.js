@@ -1,12 +1,17 @@
 import {
   findProjectByProjectId,
-  updateKanban,
   addUserToProject,
   deleteUserFromProject,
-  updateDiagram,
+} from "../db/projectsDb.js";
+
+import { getKanbanByProjectId, updateKanban } from "../db/kanbanDb.js";
+
+import {
   addToEditorCounter,
   subtractFromEditorCounter,
-} from "../db/projectsDb.js";
+} from "../db/notesDb.js";
+
+import { getDiagramByProjectId, updateDiagram } from "../db/diagramDb.js";
 
 import {
   findUserByUsername,
@@ -56,10 +61,10 @@ export default (io) => {
     });
     socket.on("load-kanban", async (data) => {
       try {
-        const project = await findProjectByProjectId(data.projectId);
-        if (project.kanban || project.kanban != 0) {
+        const kanban = await getKanbanByProjectId(data.projectId);
+        if (kanban || kanban != 0) {
           socket.emit("kanban-data", {
-            kanban: project.kanban,
+            kanban,
             message: "",
           });
         } else {
@@ -74,10 +79,11 @@ export default (io) => {
     socket.on("load-diagram", async (data) => {
       try {
         const projectId = data.projectId;
-        const project = await findProjectByProjectId(projectId);
-        if (project.diagram || project.diagram != 0) {
+        //const project = await findProjectByProjectId(projectId);
+        const diagram = await getDiagramByProjectId(projectId);
+        if (diagram || diagram != 0) {
           socket.emit("diagram-data", {
-            diagram: project.diagram,
+            diagram: diagram,
             message: "",
           });
         } else {
