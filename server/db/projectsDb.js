@@ -218,14 +218,26 @@ export const subtractFromEditorCounter = async (projectId, noteName) => {
       { $inc: { "notes.$.editorCounter": -1 } }
     );
 
-    if (result.modifiedCount === 0) {
-      throw new Error("No matching documents found or editorCounter is already at 0.");
-    }
-
     return result;
   } catch (err) {
     console.error("Error occurred while decrementing editorCounter", err);
     throw new Error("Failed to decrement editorCounter");
+  }
+};
+
+export const resetEditorCounterForProject = async (projectId) => {
+  try {
+    const _id = new ObjectId(projectId);
+
+    const result = await db.projects.updateMany(
+      { _id, "notes.editorCounter": { $gt: 0 } },
+      { $set: { "notes.$.editorCounter": 0 } }
+    );
+
+    return result;
+  } catch (err) {
+    console.error("Error occurred while resetting editorCounters", err);
+    throw new Error("Failed to reset editorCounters");
   }
 };
 

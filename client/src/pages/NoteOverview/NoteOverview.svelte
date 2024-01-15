@@ -43,6 +43,7 @@
 
   onMount(loadNotes);
 
+  // load array of notes
   async function loadNotes() {
     try {
       const response = await fetch($BASE_URL + `/notes`, {
@@ -55,13 +56,14 @@
         items.reverse();
       } else {
         const result = await response.json();
-        showToast(result.message, "error");
+        showToast(result.message, "info");
       }
     } catch (error) {
       showToast("An error occurred during load.", "error");
     }
   }
 
+  // create new note
   async function handleCreateNewNote() {
     try {
       const newNote = {
@@ -116,6 +118,7 @@
     }
   }
 
+  // transforms dates into readable data
   function handleDate(date) {
     return new Date(date).toLocaleDateString("en-GB", {
       day: "numeric",
@@ -123,9 +126,12 @@
       year: "numeric",
     });
   }
-  
- function isBeingEdited(editorCounter) {
-    return editorCounter !== null && editorCounter !== undefined && editorCounter > 0;
+
+  // sets being edited to true if the value is not null, undefined or 0
+  function isBeingEdited(editorCounter) {
+    return (
+      editorCounter !== null && editorCounter !== undefined && editorCounter > 0
+    );
   }
 
   function handleNavigate(noteName) {

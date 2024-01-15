@@ -21,7 +21,6 @@ export default (io) => {
     // join project room with projectId
     const projectId = await socket.handshake.query.projectId;
     socket.join(projectId);
-
     // kanban sockets
     socket.on("update-kanban", async (data) => {
       try {
@@ -143,16 +142,16 @@ export default (io) => {
 
     socket.on("add-user", async (data) => {
       try {
-        const result = await addUserToProject(data.projectId, data.username);
-        const resultUser = await addProjectIdToUser(
-          data.username,
-          data.projectId
-        );
+        const projectId = data.projectId;
+        const username = data.username;
+        const result = await addUserToProject(projectId, username);
+        const resultUser = await addProjectIdToUser(username, projectId);
+        const project = await findProjectByProjectId(projectId);
         if (result.modifiedCount === 1 && resultUser.modifiedCount === 1) {
           // emits changes to project users to all in project room
-          io.to(data.projectId).emit("add-user-success", {
+          io.to(projectId).emit("add-user-success", {
             message: "User added",
-            user: data.username,
+            users: project.users,
           });
         } else {
           socket.emit("add-user-error", {
@@ -166,19 +165,16 @@ export default (io) => {
 
     socket.on("remove-user", async (data) => {
       try {
-        const result = await deleteUserFromProject(
-          data.projectId,
-          data.username
-        );
-        const resultUser = await removeProjectIdFromUser(
-          data.username,
-          data.projectId
-        );
-        if (result.modifiedCount === 1 && resultUser.modifiedCount === 1) {
+        const projectId = data.projectId;
+        const username = data.username;
+        const result = await deleteUserFromProject(projectId, username);
+        const resultUser = await removeProjectIdFromUser(username, projectId);
+        const project = await findProjectByProjectId(projectId);
+        if (resultUser.modifiedCount === 1 && result.modifiedCount === 1) {
           // emits changes to project users to all in project room
-          io.to(data.projectId).emit("remove-user-success", {
+          io.to(projectId).emit("remove-user-success", {
             message: "User removed",
-            user: data.username,
+            users: project.users,
           });
         } else {
           socket.emit("remove-user-error", {
@@ -190,17 +186,16 @@ export default (io) => {
       }
     });
 
+    // for counting number of clients currently editing a note
     socket.on("add-to-counter", async (data) => {
       const projectId = data.projectId;
       const noteName = data.noteName;
       const username = data.username;
       const result = await addToEditorCounter(projectId, noteName);
       if (result.modifiedCount === 1) {
-        socket.broadcast
-          .to(projectId)
-          .emit("user-editing", {
-            message: `${noteName} is currently being edited by ${username}`,
-          });
+        socket.broadcast.to(projectId).emit("user-editing", {
+          message: `${noteName} is currently being edited by ${username}`,
+        });
       }
     });
 
@@ -210,14 +205,13 @@ export default (io) => {
       const username = data.username;
       const result = await subtractFromEditorCounter(projectId, noteName);
       if (result.modifiedCount === 1) {
-        socket.broadcast
-          .to(projectId)
-          .emit("user-stopped-editing", {
-            message: `${username} is no longer editing ${noteName}`,
-          });
+        socket.broadcast.to(projectId).emit("user-stopped-editing", {
+          message: `${username} is no longer editing ${noteName}`,
+        });
       }
-    })
+    });
 
+    // disconnect
     socket.on("terminate", () => {
       socket.disconnect();
     });

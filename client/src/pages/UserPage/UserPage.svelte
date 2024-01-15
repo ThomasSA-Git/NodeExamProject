@@ -24,14 +24,11 @@
   onMount(loadProjects);
 
   async function loadProjects() {
-    disconnectSocket();
+      disconnectSocket();
     try {
-      const response = await fetch(
-        $BASE_URL + `/projects`,
-        {
-          credentials: "include",
-        }
-      );
+      const response = await fetch($BASE_URL + `/projects`, {
+        credentials: "include",
+      });
 
       if (response.ok) {
         const responseData = await response.json();
@@ -82,30 +79,29 @@
     }
   }
 
-  function handleNavigate(projectName, projectId) {
+  async function handleNavigate(projectName, projectId) {
     $currentProjectName = projectName;
     $currentProjectId = projectId;
-
     navigate("/project");
   }
 
   let sortColumn = null;
-  let sortDirection = 'asc';
+  let sortDirection = "asc";
 
   function sortBy(column) {
     if (sortColumn === column) {
-      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      sortDirection = sortDirection === "asc" ? "desc" : "asc";
     } else {
       sortColumn = column;
-      sortDirection = 'asc';
+      sortDirection = "asc";
     }
 
     // Sorts the array with projects (called items because of paginate lite)
     items = [...items].sort((a, b) => {
-      const aValue = column === 'projectName' ? a.projectName : a.createdAt;
-      const bValue = column === 'projectName' ? b.projectName : b.createdAt;
+      const aValue = column === "projectName" ? a.projectName : a.createdAt;
+      const bValue = column === "projectName" ? b.projectName : b.createdAt;
 
-      if (sortDirection === 'asc') {
+      if (sortDirection === "asc") {
         return aValue.localeCompare(bValue);
       } else {
         return bValue.localeCompare(aValue);
@@ -128,29 +124,28 @@
 <hr />
 
 {#if items.length > 0}
-<table class="items">
-  <thead>
-    <tr>
-      <th on:click={() => sortBy('projectName')}>Project Name</th>
-      <th on:click={() => sortBy('createdAt')}>Created at</th>
-    </tr>
-  </thead>
-  <tbody>
-    {#each paginatedItems as item}
-      <tr
-        class="item"
-        on:click={() => handleNavigate(item.projectName, item._id)}
-      >
-        <td>{item.projectName}</td>
-        <!-- Add more columns as needed -->
-        <td style="max-width: 100px;">{item.createdAt}</td>
+  <table class="items">
+    <thead>
+      <tr>
+        <th on:click={() => sortBy("projectName")}>Project Name</th>
+        <th on:click={() => sortBy("createdAt")}>Created at</th>
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each paginatedItems as item}
+        <tr
+          class="item"
+          on:click={() => handleNavigate(item.projectName, item._id)}
+        >
+          <td>{item.projectName}</td>
+          <!-- Add more columns as needed -->
+          <td style="max-width: 100px;">{item.createdAt}</td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
 {:else}
-<p>You're not involved in any projects yet. Create one to see list.</p>
-
+  <p>You're not involved in any projects yet. Create one to see list.</p>
 {/if}
 <LightPaginationNav
   totalItems={items.length}

@@ -9,8 +9,6 @@ export const initializeSocket = (IO_URL, projectId) => {
         projectId: projectId,
       },
     });
-
-
     // Return a promise that resolves when the socket is connected
     return new Promise((resolve) => {
       socket.on("connect", () => {
@@ -25,10 +23,10 @@ export const initializeSocket = (IO_URL, projectId) => {
 
 export const disconnectSocket = () => {
   if (socket) {
-    // Close the connection
-    socket.emit("terminate");
+    // close the connection server side
+    socket.disconnect();
 
-    // Reset the socket variable
+    // reset the socket variable
     socket = null;
   }
 };

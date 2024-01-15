@@ -33,8 +33,11 @@
 
       if (response.ok) {
         const result = await response.json();
-        initializeSocket($IO_URL, $currentProjectId);
-        socket = getSocket();
+        if (getSocket() === null) {
+          socket = await initializeSocket($IO_URL, $currentProjectId);
+        } else {
+          socket = getSocket();
+        }
         kanban = result.projectData.kanban;
         taskSum = kanban.reduce(
           (accumulator, current) => accumulator + current.taskCount,
@@ -98,7 +101,7 @@
     });
     socket.on("add-user-success", (data) => {
       showToast(data.message, "success");
-      users = [...users, data.user];
+      users = data.users;
       searchUser = "";
     });
     socket.on("add-user-error", (data) => {
@@ -113,7 +116,7 @@
     });
     socket.on("remove-user-success", (data) => {
       showToast(data.message, "success");
-      users = users.filter((user) => user !== data.user);
+      users = data.users;
     });
     socket.on("remove-user-error", (data) => {
       showToast(data.message, "error");
@@ -254,8 +257,9 @@
         </tr>
       {/each}
     </div>
-  </div>  
+  </div>
 </div>
+
 <!-- style set here for rect to override the background color of diagram -->
 <style>
   rect {

@@ -14,7 +14,7 @@
   import { BASE_URL } from "./store/global.js";
   import Diagram from "./pages/Diagram/Diagram.svelte";
   import NoteOverview from "./pages/NoteOverview/NoteOverview.svelte";
-  import { disconnectSocket } from "./util/socketService.js";
+  import { getSocket, disconnectSocket } from "./util/socketService.js";
 
   import { onMount } from "svelte";
   import { showToast } from "./assets/js/toast";
@@ -30,21 +30,20 @@
 
   async function handleLogout() {
     try {
-      disconnectSocket();
       const response = await fetch($BASE_URL + "/auth/logout", {
         credentials: "include",
       });
-      
-      if(response.ok){
-      $user = null;
-      $currentProjectId = null;
-      $currentProjectName = null;
-      localStorage.clear();
-      navigate("/");
-    }
-    else {
-      showToast("Not logged out", "error");
-    }
+
+      if (response.ok) {
+        $user = null;
+        $currentProjectId = null;
+        $currentProjectName = null;
+        localStorage.clear();
+        disconnectSocket();
+        navigate("/");
+      } else {
+        showToast("Not logged out", "error");
+      }
     } catch (error) {
       console.error("Error during logout:", error);
     }

@@ -40,9 +40,10 @@ router.get("/api/notes", isAuthenticated, async (req, res) => {
     const notes = await findNotesByProjectId(projectId);
     if (notes.length != 0) {
       res.status(200).send({ data: notes });
-    }
-    else{
-      res.status(404).send({ message: "No notes attached to project at the moment."})
+    } else {
+      res
+        .status(404)
+        .send({ message: "No notes attached to project at the moment." });
     }
   } catch (error) {
     console.error("Error in getting notes", error);
@@ -70,7 +71,7 @@ router.get("/api/notes/:noteName", isAuthenticated, async (req, res) => {
 router.patch("/api/notes/:noteName", isAuthenticated, async (req, res) => {
   try {
     const updatedNote = req.body;
-    await updateNoteByNoteName(
+    const result = await updateNoteByNoteName(
       req.session.projectId,
       req.params.noteName,
       updatedNote

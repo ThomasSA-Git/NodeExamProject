@@ -111,6 +111,7 @@
     }
   }
 
+  // adjust editor counter
   function adjustCounterUp() {
     socket.emit("add-to-counter", {
       noteName: $currentNoteName,
@@ -121,7 +122,10 @@
       showToast(data.message, "info");
     });
   }
+
+  // adjust editor counter
   function adjustCounterDown() {
+    console.log("stop edit");
     socket.emit("subtract-from-counter", {
       noteName: $currentNoteName,
       projectId: $currentProjectId,
@@ -133,12 +137,12 @@
   }
 
   function handleNavigate() {
+    adjustCounterDown();
     navigate("/noteOverview");
   }
 
   onDestroy(() => {
     handleUpdate();
-    adjustCounterDown();
   });
 </script>
 
