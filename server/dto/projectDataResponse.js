@@ -1,21 +1,17 @@
-import { getProjectByProjectId } from "../db/projectsDb.js"
 
-export async function dataForProjectPage(projectId){
-
-    const result = await getProjectByProjectId(projectId);
-    
-    const projectData = {
-        kanban: transformKanban(result.kanban),
-        users: result.users
+export function projectResponse(project){
+    const projectResponse = {
+        kanban: transformKanban(project.kanban),
+        users: project.users
     }
-    return projectData;
+    return projectResponse;
 }
 
 function transformKanban(kanban) {
     const transformedKanban = kanban.map((list) => {
       return {
         name: list.name,
-        taskCount: list.tasks.length // Count of tasks in the array
+        taskCount: list.tasks.length
       };
     });
   

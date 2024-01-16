@@ -4,7 +4,7 @@ import db from "./connection.js";
 export const getProjectsByUsername = async (username) => {
   try {
     const result = await db.projects.find({ users: username }).toArray();
-    return result;
+    return result.reverse();
   } catch (err) {
     console.error("Error occurred while finding projects by user", err);
     throw err;
@@ -18,16 +18,6 @@ export const getProjectByProjectId = async (projectId) => {
     return result;
   } catch (err) {
     console.error("Error occurred while finding project", err);
-    throw err;
-  }
-};
-
-export const findAllProjects = async () => {
-  try {
-    const result = await db.projects.find().toArray();
-    return result.reverse();
-  } catch (err) {
-    console.error("Error occurred while finding all users", err);
     throw err;
   }
 };

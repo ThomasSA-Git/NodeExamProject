@@ -10,14 +10,17 @@ import {
   deleteNoteByNoteName,
 } from "../db/notesDb.js";
 
+import { notesResponse } from "../dto/notesResponse.js";
+
 import { isAuthenticated } from "../middleware/authMiddleWare.js";
 
 router.get("/api/notes", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.session.projectId;
-    const notes = await getNotesByProjectId(projectId);
+    let notes = await getNotesByProjectId(projectId);
     if (notes.length != 0) {
-      res.status(200).send({ data: notes });
+      notes = notesResponse(notes);
+      res.status(200).send({ notes });
     } else {
       res
         .status(404)
@@ -57,9 +60,8 @@ router.post("/api/notes", isAuthenticated, async (req, res) => {
       const result = await createNote(projectId, note);
       if (result.modifiedCount === 1) {
         res.status(201).send({ message: "Note created", created: true });
-      }
-      else {
-        res.status(404).send({ message: "Could not create note"})
+      } else {
+        res.status(404).send({ message: "Could not create note" });
       }
     } else {
       res.status(404).send({

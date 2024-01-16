@@ -12,6 +12,8 @@ import {
   getNotesByProjectId,
 } from "../db/notesDb.js";
 
+import { notesResponse } from "../dto/notesResponse.js";
+
 import { getDiagramByProjectId, updateDiagram } from "../db/diagramDb.js";
 
 import {
@@ -162,12 +164,12 @@ export default (io) => {
             users: project.users,
           });
         } else {
-          socket.emit("add-user-error", {
+          socket.emit("user-error", {
             message: "User not added. Error while saving.",
           });
         }
       } catch (error) {
-        socket.emit("add-user-error", { message: `Error: ${error}` });
+        socket.emit("user-error", { message: `Error: ${error}` });
       }
     });
 
@@ -185,40 +187,66 @@ export default (io) => {
             users: project.users,
           });
         } else {
-          socket.emit("remove-user-error", {
+          socket.emit("user-error", {
             message: "User not removed. Error while saving.",
           });
         }
       } catch (error) {
-        socket.emit("remove-user-error", { message: `Error: ${error}` });
+        socket.emit("user-error", { message: `Error: ${error}` });
       }
     });
 
     /*                        NOTES COUNTER AND UPDATE TABLE SOCKETS                       */
     socket.on("add-to-counter", async (data) => {
-      const projectId = data.projectId;
-      const noteName = data.noteName;
-      const username = data.username;
-      const result = await addToEditorCounter(projectId, noteName);
-      const notes = await getNotesByProjectId(projectId);
-      if (result.modifiedCount === 1) {
-        socket.broadcast.to(projectId).emit("user-editing", {
-          message: `${noteName} is currently being edited by ${username}`,
-          notes,
+      try {
+        const projectId = data.projectId;
+        const noteName = data.noteName;
+        const username = data.username;
+
+        const result = await addToEditorCounter(projectId, noteName);
+        let notes = await getNotesByProjectId(projectId);
+
+        if (notes != undefined && notes.editorCounter != 0) {
+          notes = notesResponse(notes);
+          socket.broadcast.to(projectId).emit("user-editing", {
+            message: `${noteName} is currently being edited by ${username}`,
+            notes,
+          });
+        } else {
+          socket.emit("editor-count-error", {
+            message: `Error. Being edited status might not be correct`,
+          });
+        }
+      } catch (error) {
+        socket.emit("editor-count-error", {
+          message: `Error. Being edited status might not be correct. Server error`,
         });
       }
     });
 
     socket.on("subtract-from-counter", async (data) => {
-      const projectId = data.projectId;
-      const noteName = data.noteName;
-      const username = data.username;
-      const result = await subtractFromEditorCounter(projectId, noteName);
-      const notes = await getNotesByProjectId(projectId);
-      if (result.modifiedCount === 1) {
-        socket.broadcast.to(projectId).emit("user-stopped-editing", {
-          message: `${username} is no longer editing ${noteName}`,
-          notes,
+      try {
+        const projectId = data.projectId;
+        const noteName = data.noteName;
+        const username = data.username;
+
+        const result = await subtractFromEditorCounter(projectId, noteName);
+        let notes = await getNotesByProjectId(projectId);
+
+        if (notes != undefined) {
+          notes = notesResponse(notes);
+          socket.broadcast.to(projectId).emit("user-stopped-editing", {
+            message: `${noteName} is no longer being edited by ${username}`,
+            notes,
+          });
+        } else {
+          socket.emit("editor-count-error", {
+            message: `Error. Being edited status might not be correct`,
+          });
+        }
+      } catch (error) {
+        socket.emit("editor-count-error", {
+          message: `Error. Being edited status might not be correct. Server error`,
         });
       }
     });

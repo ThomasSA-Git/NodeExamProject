@@ -56,7 +56,7 @@
       if (response.ok) {
         socket = getSocket();
         const result = await response.json();
-        items = result.data;
+        items = result.notes;
       } else {
         const error = await response.json();
         showToast(error.message, "info");
@@ -71,12 +71,15 @@
     });
 
     socket.on("user-stopped-editing", (data) => {
-      console.log(data)
       showToast(data.message, "info");
       items = data.notes;
     });
+
+    socket.on("editor-count-error", (data) => {
+      showToast(data.message, "error");
+    });
   }
-  
+
   // create new note
   async function handleCreateNewNote() {
     try {
@@ -135,11 +138,11 @@
 
   // transforms dates into readable data
   function handleDate(date) {
-    return new Date(date).toLocaleDateString("en-GB", {
+    /*    return new Date(date).toLocaleDateString("en-GB", {
       day: "numeric",
       month: "short",
       year: "numeric",
-    });
+    }); */
   }
 
   // sets being edited to true if the value is not null, undefined or 0
@@ -175,7 +178,7 @@
       {#each paginatedItems as item}
         <tr class="item" on:click={() => handleNavigate(item.noteName)}>
           <td>{item.noteName}</td>
-          <td style="max-width: 100px;">{handleDate(item.note.time)}</td>
+          <td style="max-width: 100px;">{item.note.time}</td>
           <td>{item.lastEditedBy}</td>
           <td>{isBeingEdited(item.editorCounter)}</td>
         </tr>

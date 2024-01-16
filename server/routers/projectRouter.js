@@ -12,7 +12,7 @@ import {
 import { addProjectIdToUser, removeProjectIdFromUser } from "../db/usersDb.js";
 
 import {
-  dataForProjectPage,
+  projectResponse,
   convertTimestampToDate,
 } from "../dto/projectDataResponse.js";
 
@@ -24,9 +24,11 @@ router.get("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.params.projectId;
     req.session.projectId = projectId;
-    const projectData = await dataForProjectPage(projectId);
-    if (projectData) {
-      res.status(200).send({ projectData });
+    let project = await getProjectByProjectId(projectId);
+
+    if (project) {
+      project = projectResponse(project);
+      res.status(200).send({ project });
     } else {
       res.status(404).send({ message: "Project not found" });
     }

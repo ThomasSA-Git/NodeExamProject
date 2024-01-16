@@ -47,6 +47,8 @@
   .user-table {
     overflow-y: scroll;
     min-height: 250px;
+    max-height: 350px;
+    border: 1px solid #ccc;
   }
 
   .vertical-line {

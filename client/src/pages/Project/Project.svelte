@@ -36,12 +36,12 @@
         } else {
           socket = getSocket();
         }
-        kanban = result.projectData.kanban;
+        kanban = result.project.kanban;
         taskSum = kanban.reduce(
           (accumulator, current) => accumulator + current.taskCount,
           0
         );
-        users = result.projectData.users;
+        users = result.project.users;
       } else {
         const error = await response.json();
         showToast(error.message, "error");
@@ -54,15 +54,12 @@
       users = data.users;
       searchUser = "";
     });
-    socket.on("add-user-error", (data) => {
+    socket.on("user-error", (data) => {
       showToast(data.message, "error");
     });
     socket.on("remove-user-success", (data) => {
       showToast(data.message, "success");
       users = data.users;
-    });
-    socket.on("remove-user-error", (data) => {
-      showToast(data.message, "error");
     });
   });
 
