@@ -1,10 +1,13 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import "../../assets/css/taskModal.css";
-  
+
+    // prop function from parent
     export let updateTask;
+    // prop variable from parent, gets set when opening update modal from list of tasks
     export let taskToUpdate;
-  
+
+    // sets all values to be equal to the task to be updated
     let updatedTaskName = taskToUpdate.name;
     let updatedDescription = taskToUpdate.description;
     let updatedUrl = taskToUpdate.url;
@@ -19,7 +22,7 @@
         
         return;
       }
-      // use updateTask in parent
+      // use updateTask functionin parent
       updateTask({
         name: updatedTaskName,
         description: updatedDescription,
@@ -29,12 +32,12 @@
       });
   
   
-      // Close the modal after updating task
+      // close the modal after updating task
       dispatch('closeModal');
     }
   
     function handleClose() {
-      // Close the modal without updating the task
+      // close the modal without updating the task
       dispatch('closeModal');
     }
   </script>

@@ -1,14 +1,17 @@
 <script>
   import { onMount } from "svelte";
   import { paginate, LightPaginationNav } from "svelte-paginate";
-  import { BASE_URL } from "../../store/global";
-  import { currentProjectId, currentNoteName } from "../../store/project";
-  import { showToast } from "../../assets/js/toast";
+  import { BASE_URL } from "../../store/global.js";
+  import { user } from "../../store/stores.js";
+  import { currentProjectId, currentNoteName } from "../../store/project.js";
+  import { showToast } from "../../assets/js/toast.js";
   import { navigate } from "svelte-navigator";
+  import { getSocket } from "../../util/socketService";
   import "../../assets/css/toast.css";
   import "../../assets/css/noteOverview.css";
 
   let newNoteName;
+  let socket;
 
   // needs to be named items to be used in paginate
   let items = [];
@@ -51,9 +54,9 @@
       });
 
       if (response.ok) {
+        socket = getSocket();
         const result = await response.json();
         items = result.data;
-        items.reverse();
       } else {
         const result = await response.json();
         showToast(result.message, "info");
@@ -61,8 +64,19 @@
     } catch (error) {
       showToast("An error occurred during load.", "error");
     }
-  }
 
+    socket.on("user-editing", (data) => {
+      showToast(data.message, "info");
+      items = data.notes;
+    });
+
+    socket.on("user-stopped-editing", (data) => {
+      console.log(data)
+      showToast(data.message, "info");
+      items = data.notes;
+    });
+  }
+  
   // create new note
   async function handleCreateNewNote() {
     try {
@@ -87,6 +101,7 @@
         projectId: $currentProjectId,
         note: {
           noteName: newNoteName,
+          lastEditedBy: $user,
           note: newNote,
         },
       };
@@ -152,6 +167,7 @@
       <tr>
         <th on:click={() => sortBy("noteName")}>Note Name</th>
         <th on:click={() => sortBy("createdAt")}>Created at</th>
+        <th>Last edited by</th>
         <th>Being edited</th>
       </tr>
     </thead>
@@ -160,6 +176,7 @@
         <tr class="item" on:click={() => handleNavigate(item.noteName)}>
           <td>{item.noteName}</td>
           <td style="max-width: 100px;">{handleDate(item.note.time)}</td>
+          <td>{item.lastEditedBy}</td>
           <td>{isBeingEdited(item.editorCounter)}</td>
         </tr>
       {/each}

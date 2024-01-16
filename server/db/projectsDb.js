@@ -25,7 +25,7 @@ export const findProjectByProjectId = async (projectId) => {
 export const findAllProjects = async () => {
   try {
     const result = await db.projects.find().toArray();
-    return result;
+    return result.reverse();
   } catch (err) {
     console.error("Error occurred while finding all users", err);
     throw err;

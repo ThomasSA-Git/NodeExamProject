@@ -62,7 +62,7 @@
 <style>
   .custom {
     padding: 10px;
-    background: white;
+    background: #f4f4f4;
     border: 1px solid #555;
     border-radius: 3px;
   }

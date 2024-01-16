@@ -1,0 +1,20 @@
+.sidebar {
+    width: 10vw;
+    background: #f4f4f4;
+    padding: 0.4rem 0.8rem;
+    font-size: 12px;
+    max-height: 70vh;
+    overflow-y: scroll;
+  }
+
+  .node-item {
+    margin-bottom: 15px;
+  }
+
+  .button-sidebar {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }

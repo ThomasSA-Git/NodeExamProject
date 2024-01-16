@@ -9,6 +9,7 @@ import { getKanbanByProjectId, updateKanban } from "../db/kanbanDb.js";
 import {
   addToEditorCounter,
   subtractFromEditorCounter,
+  findNotesByProjectId
 } from "../db/notesDb.js";
 
 import { getDiagramByProjectId, updateDiagram } from "../db/diagramDb.js";
@@ -198,9 +199,10 @@ export default (io) => {
       const noteName = data.noteName;
       const username = data.username;
       const result = await addToEditorCounter(projectId, noteName);
+      const notes = await findNotesByProjectId(projectId);
       if (result.modifiedCount === 1) {
         socket.broadcast.to(projectId).emit("user-editing", {
-          message: `${noteName} is currently being edited by ${username}`,
+          message: `${noteName} is currently being edited by ${username}`, notes
         });
       }
     });
@@ -210,9 +212,11 @@ export default (io) => {
       const noteName = data.noteName;
       const username = data.username;
       const result = await subtractFromEditorCounter(projectId, noteName);
+      // might not be needed
+      const notes = await findNotesByProjectId(projectId);
       if (result.modifiedCount === 1) {
         socket.broadcast.to(projectId).emit("user-stopped-editing", {
-          message: `${username} is no longer editing ${noteName}`,
+          message: `${username} is no longer editing ${noteName}`, notes,
         });
       }
     });

@@ -21,7 +21,7 @@
   onMount(loadData);
 
   let noteData;
-
+  let lastEditedBy;
   let socket;
 
   function initializeEditor() {
@@ -56,6 +56,7 @@
       } else {
         const result = await response.json();
         noteData = result[0].note;
+        lastEditedBy = result[0].lastEditedBy;
         socket = getSocket();
         initializeEditor();
         adjustCounterUp();
@@ -63,6 +64,15 @@
     } catch (error) {
       showToast(error, "error");
     }
+
+    socket.on("user-editing", (data) => {
+      showToast(data.message, "info");
+    });
+
+    socket.on("user-stopped-editing", (data) => {
+      //console.log(data)
+      showToast(data.message, "info");
+    });
   }
 
   async function handleUpdate() {
@@ -72,6 +82,7 @@
       // Prepare the updated note object without wrapping it in an array
       const updatedNote = {
         noteName: $currentNoteName,
+        lastEditedBy: $user,
         note: savedNoteData,
       };
       const response = await fetch($BASE_URL + "/notes/" + $currentNoteName, {
@@ -118,21 +129,14 @@
       projectId: $currentProjectId,
       username: $user,
     });
-    socket.on("user-editing", (data) => {
-      showToast(data.message, "info");
-    });
   }
 
   // adjust editor counter
   function adjustCounterDown() {
-    console.log("stop edit");
     socket.emit("subtract-from-counter", {
       noteName: $currentNoteName,
       projectId: $currentProjectId,
       username: $user,
-    });
-    socket.on("user-stopped-editing", (data) => {
-      showToast(data.message, "info");
     });
   }
 
@@ -148,6 +152,7 @@
 
 <div>
   <h2>{$currentNoteName}</h2>
+  <p><strong>Last edited by: </strong> {lastEditedBy}</p>
   <button on:click={handleUpdate}>Save changes</button>
   <button class="navigate-button" on:click={handleNavigate}>Back</button>
   <button class="delete-btn" on:click={handleDeleteNote}>Delete</button>

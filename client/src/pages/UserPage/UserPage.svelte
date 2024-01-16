@@ -10,8 +10,6 @@
   import { paginate, LightPaginationNav } from "svelte-paginate";
   import { disconnectSocket } from "../../util/socketService.js";
 
-  let data = [];
-
   // needs to be named items to be used in paginate
   let items = [];
 
@@ -32,7 +30,6 @@
 
       if (response.ok) {
         const responseData = await response.json();
-        data = responseData.data;
         items = responseData.data;
       } else {
         const errorData = await response.json();

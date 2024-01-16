@@ -1,15 +1,14 @@
 <script>
   import { onMount, onDestroy } from "svelte";
   import { BASE_URL } from "../../store/global";
-  import { user } from "../../store/stores";
   import { currentProjectName, currentProjectId } from "../../store/project";
   import { navigate } from "svelte-navigator";
   import "../../assets/css/toast.css";
   import "../../assets/css/project.css";
   import { showToast } from "../../assets/js/toast";
+  import Chart from "./Chart.svelte";
   import * as d3 from "d3";
   import { IO_URL } from "../../store/global";
-  import io from "socket.io-client";
   // addition for socket connection
   import { getSocket, initializeSocket } from "../../util/socketService";
 
@@ -50,6 +49,21 @@
     } catch (error) {
       showToast("Error occured. Could not show project", "error");
     }
+    socket.on("add-user-success", (data) => {
+      showToast(data.message, "success");
+      users = data.users;
+      searchUser = "";
+    });
+    socket.on("add-user-error", (data) => {
+      showToast(data.message, "error");
+    });
+    socket.on("remove-user-success", (data) => {
+      showToast(data.message, "success");
+      users = data.users;
+    });
+    socket.on("remove-user-error", (data) => {
+      showToast(data.message, "error");
+    });
   });
 
   async function handleDeleteProject() {
@@ -99,14 +113,6 @@
       username: searchUser,
       projectId: $currentProjectId,
     });
-    socket.on("add-user-success", (data) => {
-      showToast(data.message, "success");
-      users = data.users;
-      searchUser = "";
-    });
-    socket.on("add-user-error", (data) => {
-      showToast(data.message, "error");
-    });
   }
 
   function handleRemoveUser(username) {
@@ -114,43 +120,6 @@
       username,
       projectId: $currentProjectId,
     });
-    socket.on("remove-user-success", (data) => {
-      showToast(data.message, "success");
-      users = data.users;
-    });
-    socket.on("remove-user-error", (data) => {
-      showToast(data.message, "error");
-    });
-  }
-
-  // chart logic -----------------------------
-  const formatLabel = d3.format(",.0f");
-
-  const margin = {
-    top: 30,
-    right: 100,
-    bottom: 0,
-    left: 110,
-  };
-
-  let width = 500;
-  let height = 150;
-
-  $: innerWidth = width - margin.left - margin.right;
-  let innerHeight = height - margin.top - margin.bottom;
-
-  let xScale, yScale;
-  $: if (kanban.length > 0) {
-    xScale = d3
-      .scaleLinear()
-      .domain([0, d3.max(kanban, (list) => list.taskCount)])
-      .range([0, innerWidth]);
-
-    yScale = d3
-      .scaleBand()
-      .domain(kanban.map((list) => list.name))
-      .range([0, innerHeight])
-      .padding(0.25);
   }
 
   function handleNavigate(path) {
@@ -188,43 +157,7 @@
 
 <div class="row">
   <div class="container">
-    <h2>Chart overview for kanban</h2>
-    <h3>Sum of all tasks on project: {taskSum}</h3>
-    {#if kanban.length > 0}
-      <div class="wrapper" bind:clientWidth={width}>
-        <svg {width} {height}>
-          <g transform={`translate(${margin.left}, ${margin.top})`}>
-            {#each kanban as list}
-              <text
-                text-anchor="end"
-                x={-10}
-                y={yScale(list.name) + yScale.bandwidth() / 2}
-                dy=".35em"
-              >
-                {list.name}
-              </text>
-              <rect
-                x={0}
-                y={yScale(list.name)}
-                width={xScale(list.taskCount)}
-                height={yScale.bandwidth()}
-              />
-              <text
-                text-anchor="start"
-                x={xScale(list.taskCount)}
-                dx="10"
-                y={yScale(list.name) + yScale.bandwidth() / 2}
-                dy=".35em"
-              >
-                {formatLabel(list.taskCount)}
-              </text>
-            {/each}
-          </g>
-        </svg>
-      </div>
-    {:else}
-      <p>No tasks assigned to project yet.</p>
-    {/if}
+    <Chart {taskSum} {kanban}/>
   </div>
 
   <div class="container" style="border-left: 1px solid #000;">
@@ -259,10 +192,3 @@
     </div>
   </div>
 </div>
-
-<!-- style set here for rect to override the background color of diagram -->
-<style>
-  rect {
-    fill: blue;
-  }
-</style>

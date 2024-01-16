@@ -154,7 +154,7 @@
   }
 
   function addTask(newTask) {
-    // adds the new task to the first index of the lists array
+    // adds the new task to the lists array
     kanban[0].tasks = [newTask, ...kanban[0].tasks];
     handleUpdateKanban();
   }
@@ -180,7 +180,6 @@
   function updateTask(updatedTask) {
     // updates the task in the correct list and at the correct index
     kanban[listIndexToUpdate].tasks[updateTaskIndex] = updatedTask;
-
     kanban = [...kanban];
     handleUpdateKanban();
     closeUpdateModal();

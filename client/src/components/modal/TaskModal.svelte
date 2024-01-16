@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import "../../assets/css/taskModal.css";
   import { purify } from "../../assets/js/purification.js";
-  // prop from parent, allows
+  // prop function from parent
   export let addTask;
 
   let taskName = "";
@@ -20,7 +20,7 @@
       return;
     }
 
-    // use addTask in parent
+    // use addTask function in parent
     addTask({
       name: purify(taskName),
       description: purify(description),

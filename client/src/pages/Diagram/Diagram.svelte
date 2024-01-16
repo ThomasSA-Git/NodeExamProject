@@ -3,7 +3,6 @@
   import {
     SvelteFlow,
     Controls,
-    Background,
     MiniMap,
     SvelteFlowProvider,
   } from "@xyflow/svelte";
@@ -18,11 +17,16 @@
   import { navigate } from "svelte-navigator";
   import { currentProjectId } from "../../store/project";
   import { user } from "../../store/stores";
-  import { BASE_URL, IO_URL } from "../../store/global";
-  import io from "socket.io-client";
-  import { getSocket } from '../../util/socketService';
+  import { BASE_URL } from "../../store/global";
+  import { getSocket } from "../../util/socketService";
 
   let socket = null;
+
+  let initialNodes = [];
+  let initialEdges = [];
+
+  const nodes = writable(initialNodes);
+  const edges = writable(initialEdges);
 
   onMount(async () => {
     try {
@@ -40,74 +44,6 @@
       showToast(error.message, "error");
     }
   });
-
-  let initialNodes = [];
-  let initialEdges = [];
-
-  const nodes = writable(initialNodes);
-
-  const edges = writable(initialEdges);
-
-  let savedNodes = [];
-  let savedEdges = [];
-  const unsubscribeNodes = nodes.subscribe((updatedNodes) => {
-    const updatedPositions = updatedNodes.map((node) => {
-      return node;
-    });
-
-    savedNodes = updatedPositions;
-    initialNodes = savedNodes;
-  });
-
-  const unsubscribeEdges = edges.subscribe((updatedEdges) => {
-    savedEdges = updatedEdges;
-    initialEdges = savedEdges;
-  });
-
-  const nodeTypes = {
-    custom: CustomNode,
-  };
-
-  function handleAddNode() {
-    let id = "1";
-    let highestId;
-    if (Array.isArray(initialNodes) && initialNodes.length != 0) {
-      const numericIds = initialNodes.map((node) => parseInt(node.id, 10));
-      highestId = Math.max(...numericIds);
-      id = (highestId + 1).toString();
-    }
-
-    const newNode = {
-      id: id,
-      data: { label: "New node", text: "" },
-      position: { x: 10, y: 0 },
-      type: "custom",
-    };
-
-    nodes.update((currentNodes) => [...currentNodes, newNode]);
-    updateDiagram();
-  }
-
-  function handleDeleteNode(nodeId) {
-    // remove the node with the given ID from the list of nodes
-    initialNodes = initialNodes.filter((node) => node.id !== nodeId);
-    nodes.set(initialNodes);
-    // remove any edges associated with the deleted node
-    initialEdges = initialEdges.filter(
-      (edge) => edge.source !== nodeId && edge.target !== nodeId
-    );
-    edges.set(initialEdges);
-
-    updateDiagram();
-  }
-
-  function handleDeleteEdge(edgeId) {
-    // remove the node with the given ID from the list of nodes
-    initialEdges = initialEdges.filter((edge) => edge.id !== edgeId);
-    edges.set(initialEdges);
-
-    updateDiagram();
-  }
 
   function loadDiagram() {
     try {
@@ -163,6 +99,67 @@
     });
   }
 
+  // subscribing to changes in both nodes and edges so that if, update or save is initiated
+  // the initialEdges and initialNodes are updated with positions 
+  const unsubscribeNodes = nodes.subscribe(updatedNodes => {
+  initialNodes = updatedNodes;
+});
+
+  const unsubscribeEdges = edges.subscribe((updatedEdges) => {
+    initialEdges = updatedEdges;
+  });
+
+  const nodeTypes = {
+    custom: CustomNode,
+  };
+
+  function handleAddNode() {
+    let id = "1";
+    let highestId;
+    if (Array.isArray(initialNodes) && initialNodes.length != 0) {
+      // check the highest id in the node array, gives the new node an id with +1 to that number and makes it a string again
+      const numericIds = initialNodes.map((node) => parseInt(node.id, 10));
+      highestId = Math.max(...numericIds);
+      id = (highestId + 1).toString();
+    }
+
+    // makes a custom node to add to the array of nodes. Type is set as custom so that i can use my selfmade node
+    const newNode = {
+      id: id,
+      data: { label: "New node", text: "" },
+      position: { x: 10, y: 0 },
+      type: "custom",
+    };
+
+    // updates the array of nodes
+    nodes.update((currentNodes) => [...currentNodes, newNode]);
+
+    // updates diagram and emit change to other clients in same room.
+    updateDiagram();
+  }
+
+  function handleDeleteNode(nodeId) {
+    // remove the node with the given ID from the list of nodes
+    initialNodes = initialNodes.filter((node) => node.id !== nodeId);
+    nodes.set(initialNodes);
+    // remove any edges associated with the deleted node
+    initialEdges = initialEdges.filter(
+      (edge) => edge.source !== nodeId && edge.target !== nodeId
+    );
+    edges.set(initialEdges);
+
+     // updates diagram and emit change to other clients in same room.
+    updateDiagram();
+  }
+
+  function handleDeleteEdge(edgeId) {
+    // remove the edge with the given ID from the list of nodes
+    initialEdges = initialEdges.filter((edge) => edge.id !== edgeId);
+    edges.set(initialEdges);
+
+    updateDiagram();
+  }
+
   onDestroy(() => {
     saveDiagram();
     unsubscribeNodes();
@@ -171,7 +168,7 @@
 </script>
 
 <div class="buttons">
-  <button on:click={handleAddNode}>Add node</button>
+  <button class="button" on:click={handleAddNode}>Add node</button>
   <button on:click={saveDiagram}>Save diagram</button>
   <button class="navigate-button" on:click={() => navigate("/project")}
     >Dashboard</button
