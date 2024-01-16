@@ -7,7 +7,6 @@
   import "../../assets/css/project.css";
   import { showToast } from "../../assets/js/toast";
   import Chart from "./Chart.svelte";
-  import * as d3 from "d3";
   import { IO_URL } from "../../store/global";
   // addition for socket connection
   import { getSocket, initializeSocket } from "../../util/socketService";
@@ -44,7 +43,8 @@
         );
         users = result.projectData.users;
       } else {
-        showToast("Could not load project", "error");
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
       showToast("Error occured. Could not show project", "error");
@@ -75,15 +75,17 @@
           credentials: "include",
         }
       );
-      const result = await response.json();
+
       if (response.ok) {
+        const result = await response.json();
         showToast(result.message, "success");
 
         setTimeout(() => {
           navigate("/userpage");
         }, 3000);
       } else {
-        showToast(result.message, "error");
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
       showToast("Error occured. Could not delete project", "error");
@@ -157,7 +159,7 @@
 
 <div class="row">
   <div class="container">
-    <Chart {taskSum} {kanban}/>
+    <Chart {taskSum} {kanban} />
   </div>
 
   <div class="container" style="border-left: 1px solid #000;">

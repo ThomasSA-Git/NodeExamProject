@@ -1,8 +1,8 @@
-import { findProjectByProjectId } from "../db/projectsDb.js"
+import { getProjectByProjectId } from "../db/projectsDb.js"
 
 export async function dataForProjectPage(projectId){
 
-    const result = await findProjectByProjectId(projectId);
+    const result = await getProjectByProjectId(projectId);
     
     const projectData = {
         kanban: transformKanban(result.kanban),

@@ -4,8 +4,8 @@ const router = Router();
 
 import {
   createNote,
-  findNotesByProjectId,
-  findNoteByNoteName,
+  getNotesByProjectId,
+  getNoteByNoteName,
   updateNoteByNoteName,
   deleteNoteByNoteName,
 } from "../db/notesDb.js";
@@ -15,7 +15,7 @@ import { isAuthenticated } from "../middleware/authMiddleWare.js";
 router.get("/api/notes", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.session.projectId;
-    const notes = await findNotesByProjectId(projectId);
+    const notes = await getNotesByProjectId(projectId);
     if (notes.length != 0) {
       res.status(200).send({ data: notes });
     } else {
@@ -33,38 +33,43 @@ router.get("/api/notes/:noteName", isAuthenticated, async (req, res) => {
   const noteName = req.params.noteName;
   const projectId = req.session.projectId;
   try {
-    const result = await findNoteByNoteName(projectId, noteName);
+    const result = await getNoteByNoteName(projectId, noteName);
 
-    if (result.length > 0) {
+    if (result.length != 0) {
       res.status(200).send(result);
     } else {
       res.status(404).send({ message: "Note not found" });
     }
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({ message: "Internal Server Error" });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
 router.post("/api/notes", isAuthenticated, async (req, res) => {
   try {
     const { projectId, note } = req.body;
-    const result = await findNoteByNoteName(
+    const result = await getNoteByNoteName(
       req.session.projectId,
       note.noteName
     );
     if (result.length == 0) {
-      await createNote(projectId, note);
-      res.status(201).send({ message: "Note created", created: true });
+      const result = await createNote(projectId, note);
+      if (result.modifiedCount === 1) {
+        res.status(201).send({ message: "Note created", created: true });
+      }
+      else {
+        res.status(404).send({ message: "Could not create note"})
+      }
     } else {
       res.status(404).send({
-        message: "Note name already exists. Could not create.",
+        message: "Note name already exists",
         created: false,
       });
     }
   } catch (error) {
-    console.error("Error in creating notes", error);
-    res.status(500).send({ error: "Internal server error" });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
@@ -76,25 +81,34 @@ router.patch("/api/notes/:noteName", isAuthenticated, async (req, res) => {
       req.params.noteName,
       updatedNote
     );
-    if (result.modifiedCount > 0) {
-      res.status(200).send({ message: "Note updates saved." });
+    if (result.modifiedCount === 1) {
+      res.status(200).send({ message: "Note updates saved" });
     } else {
       res.status(404).send({
-        message: "No matching notes found, update not complete.",
+        message: "No matching notes found, update not made",
       });
     }
   } catch (error) {
-    res.status(500).send({ message: error });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
 router.delete("/api/notes/:noteName", isAuthenticated, async (req, res) => {
   try {
     const noteToDelete = req.params.noteName;
-    await deleteNoteByNoteName(req.session.projectId, noteToDelete);
-    res.status(200).send({ message: `${req.params.noteName} note deleted` });
+    const result = await deleteNoteByNoteName(
+      req.session.projectId,
+      noteToDelete
+    );
+    if (result.modifiedCount === 1) {
+      res.status(200).send({ message: `${noteToDelete} note deleted` });
+    } else {
+      res.status(404).send({ message: `${noteToDelete} could not be deleted` });
+    }
   } catch (error) {
-    res.status(500).send({ message: error });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 

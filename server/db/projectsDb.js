@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import db from "./connection.js";
 
-export const findProjectsByUser = async (username) => {
+export const getProjectsByUsername = async (username) => {
   try {
     const result = await db.projects.find({ users: username }).toArray();
     return result;
@@ -11,7 +11,7 @@ export const findProjectsByUser = async (username) => {
   }
 };
 
-export const findProjectByProjectId = async (projectId) => {
+export const getProjectByProjectId = async (projectId) => {
   try {
     const _id = new ObjectId(projectId);
     const result = await db.projects.findOne({ _id });

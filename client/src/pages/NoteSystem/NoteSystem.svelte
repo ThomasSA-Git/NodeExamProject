@@ -50,16 +50,16 @@
       const response = await fetch($BASE_URL + `/notes/${$currentNoteName}`, {
         credentials: "include",
       });
-      if (!response.ok) {
-        const result = await response.json();
-        showToast(result.message, "error");
-      } else {
+      if (response.ok) {
         const result = await response.json();
         noteData = result[0].note;
         lastEditedBy = result[0].lastEditedBy;
         socket = getSocket();
         initializeEditor();
         adjustCounterUp();
+      } else {
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
       showToast(error, "error");
@@ -93,14 +93,15 @@
         body: JSON.stringify(updatedNote),
         credentials: "include",
       });
-      const result = await response.json();
       if (response.ok) {
+        const result = await response.json();
         showToast(result.message, "success");
       } else {
-        showToast(result.message, "error");
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
-      showToast(`Save failed. Error: ${error.message}`, "error");
+      showToast(error.message, "error");
     }
   }
 
@@ -110,12 +111,13 @@
         method: "DELETE",
         credentials: "include",
       });
-      const result = await response.json();
       if (response.ok) {
+        const result = await response.json();
         showToast(result.message, "success");
         navigate("/noteOverview");
       } else {
-        showToast(result.message, "error");
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
       showToast(error.message, "error");

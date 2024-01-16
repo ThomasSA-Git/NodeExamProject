@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import db from "./connection.js";
 
-export const findNotesByProjectId = async (projectId) => {
+export const getNotesByProjectId = async (projectId) => {
   try {
     const _id = new ObjectId(projectId);
     const result = await db.projects.findOne({ _id }, { notes: 1 });
@@ -14,7 +14,7 @@ export const findNotesByProjectId = async (projectId) => {
   }
 };
 
-export const findNoteByNoteName = async (projectId, noteName) => {
+export const getNoteByNoteName = async (projectId, noteName) => {
   try {
     const _id = new ObjectId(projectId);
     const result = await db.projects.findOne(
@@ -74,6 +74,7 @@ export const deleteNoteByNoteName = async (projectId, noteName) => {
       { _id },
       { $pull: { notes: { noteName } } }
     );
+    return result;
   } catch (err) {
     console.error("Error occurred while deleting note by noteName", err);
     // Handle the error gracefully, you can choose to return a specific value or rethrow the error

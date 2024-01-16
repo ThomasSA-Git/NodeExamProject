@@ -26,10 +26,8 @@
       });
 
       if (response.ok) {
-        const registrationMessage = await response.json();
-
-        showToast(registrationMessage.message, "success");
-
+        const result = await response.json();
+        showToast(result.message, "success");
         username = "";
         email = "";
         password = "";
@@ -37,12 +35,8 @@
           navigate("/login");
         }, 3000);
       } else {
-        const errorData = await response.json();
-
-        const errorMessage =
-          errorData.error || "Login failed. Please check your credentials.";
-        showToast(errorMessage, "error");
-
+        const result = await response.json();
+        showToast(result.message, "error");
         username = "";
         email = "";
         password = "";
@@ -52,7 +46,6 @@
         "An unexpected error occurred. Please try again later.",
         "error"
       );
-
       username = "";
       email = "";
       password = "";

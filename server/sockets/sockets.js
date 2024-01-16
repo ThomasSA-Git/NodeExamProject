@@ -1,5 +1,5 @@
 import {
-  findProjectByProjectId,
+  getProjectByProjectId,
   addUserToProject,
   deleteUserFromProject,
 } from "../db/projectsDb.js";
@@ -9,7 +9,7 @@ import { getKanbanByProjectId, updateKanban } from "../db/kanbanDb.js";
 import {
   addToEditorCounter,
   subtractFromEditorCounter,
-  findNotesByProjectId,
+  getNotesByProjectId,
 } from "../db/notesDb.js";
 
 import { getDiagramByProjectId, updateDiagram } from "../db/diagramDb.js";
@@ -154,7 +154,7 @@ export default (io) => {
         const username = data.username;
         const result = await addUserToProject(projectId, username);
         const resultUser = await addProjectIdToUser(username, projectId);
-        const project = await findProjectByProjectId(projectId);
+        const project = await getProjectByProjectId(projectId);
         if (result.modifiedCount === 1 && resultUser.modifiedCount === 1) {
           // emits changes to project users to all in project room
           io.to(projectId).emit("add-user-success", {
@@ -177,7 +177,7 @@ export default (io) => {
         const username = data.username;
         const result = await deleteUserFromProject(projectId, username);
         const resultUser = await removeProjectIdFromUser(username, projectId);
-        const project = await findProjectByProjectId(projectId);
+        const project = await getProjectByProjectId(projectId);
         if (resultUser.modifiedCount === 1 && result.modifiedCount === 1) {
           // emits changes to project users to all in project room
           io.to(projectId).emit("remove-user-success", {
@@ -200,7 +200,7 @@ export default (io) => {
       const noteName = data.noteName;
       const username = data.username;
       const result = await addToEditorCounter(projectId, noteName);
-      const notes = await findNotesByProjectId(projectId);
+      const notes = await getNotesByProjectId(projectId);
       if (result.modifiedCount === 1) {
         socket.broadcast.to(projectId).emit("user-editing", {
           message: `${noteName} is currently being edited by ${username}`,
@@ -214,7 +214,7 @@ export default (io) => {
       const noteName = data.noteName;
       const username = data.username;
       const result = await subtractFromEditorCounter(projectId, noteName);
-      const notes = await findNotesByProjectId(projectId);
+      const notes = await getNotesByProjectId(projectId);
       if (result.modifiedCount === 1) {
         socket.broadcast.to(projectId).emit("user-stopped-editing", {
           message: `${username} is no longer editing ${noteName}`,

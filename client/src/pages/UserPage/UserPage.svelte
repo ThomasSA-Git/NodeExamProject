@@ -22,22 +22,20 @@
   onMount(loadProjects);
 
   async function loadProjects() {
-      disconnectSocket();
+    disconnectSocket();
     try {
       const response = await fetch($BASE_URL + `/projects`, {
         credentials: "include",
       });
-
       if (response.ok) {
-        const responseData = await response.json();
-        items = responseData.data;
+        const result = await response.json();
+        items = result.data;
       } else {
-        const errorData = await response.json();
-        const errorMessage = errorData.error || "Failed to fetch project data.";
-        showToast(errorMessage, "error");
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
-      showToast("An error occurred.", "error");
+      showToast("An error occurred. Could not load projects", "error");
     }
   }
 
@@ -72,7 +70,7 @@
         showToast(errorMessage, "error");
       }
     } catch (error) {
-      showToast("An error occurred.", "error");
+      showToast("An error occurred. Could not create project", "error");
     }
   }
 

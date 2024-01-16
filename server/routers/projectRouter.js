@@ -5,8 +5,8 @@ const router = Router();
 import {
   createProject,
   deleteProject,
-  findProjectByProjectId,
-  findProjectsByUser,
+  getProjectByProjectId,
+  getProjectsByUsername,
 } from "../db/projectsDb.js";
 
 import { addProjectIdToUser, removeProjectIdFromUser } from "../db/usersDb.js";
@@ -25,22 +25,26 @@ router.get("/api/projects/:projectId", isAuthenticated, async (req, res) => {
     const projectId = req.params.projectId;
     req.session.projectId = projectId;
     const projectData = await dataForProjectPage(projectId);
-    res.status(200).send({ projectData });
+    if (projectData) {
+      res.status(200).send({ projectData });
+    } else {
+      res.status(404).send({ message: "Project not found" });
+    }
   } catch (error) {
-    console.error("Error in getting project", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
 router.get("/api/projects", isAuthenticated, async (req, res) => {
   try {
     const username = req.session.user.username;
-    const projects = await findProjectsByUser(username);
+    const projects = await getProjectsByUsername(username);
     const projectsWithDates = projects.map(convertTimestampToDate);
     res.status(200).send({ data: projectsWithDates });
   } catch (error) {
-    console.error("Error in getting project", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
@@ -53,22 +57,31 @@ router.post("/api/projects", isAuthenticated, async (req, res) => {
 
     const project = await createProject(purifiedProjectName, purifiedUsername);
 
-    await addProjectIdToUser(purifiedUsername, project.insertedId);
-
-    res.status(201).send({ message: "Project created successfully" });
+    const result = await addProjectIdToUser(
+      purifiedUsername,
+      project.insertedId
+    );
+    if (result.modifiedCount === 1 && project.acknowledged) {
+      res.status(201).send({ message: "Project created successfully" });
+    } else {
+      res.status(400).send({ message: "Could not create project" });
+    }
   } catch (error) {
-    console.error("Error in creating project", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
 router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.params.projectId;
-    const foundProject = await findProjectByProjectId(projectId);
+    const foundProject = await getProjectByProjectId(projectId);
     const users = foundProject.users;
     await deleteProject(projectId);
-
+    if (!foundProject) {
+      res.status(404).send({ message: "Project not found" });
+      return;
+    }
     await Promise.all(
       users.map((user) => removeProjectIdFromUser(user, projectId))
     );
@@ -76,8 +89,8 @@ router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
       .status(200)
       .send({ message: `Project deleted successfully. Redirecting` });
   } catch (error) {
-    console.error("Error in delete project", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 

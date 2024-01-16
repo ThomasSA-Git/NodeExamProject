@@ -58,8 +58,8 @@
         const result = await response.json();
         items = result.data;
       } else {
-        const result = await response.json();
-        showToast(result.message, "info");
+        const error = await response.json();
+        showToast(error.message, "info");
       }
     } catch (error) {
       showToast("An error occurred during load.", "error");

@@ -43,42 +43,57 @@ router.post("/api/auth/login", async (req, res) => {
     if (match) {
       // Store user information in the session
       req.session.user = user;
-      
+
       res.status(200).send({
-        username: req.session.user.username
+        username: req.session.user.username,
       });
     } else {
       // Send a 401 status for incorrect password
       res.status(401).send({ error: "Invalid password." });
     }
   } else {
-    // Send a 401 status for invalid username
-    res.status(401).send({ error: "Invalid username." });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
 router.post("/api/auth/register", async (req, res) => {
-  const { username, email, password } = req.body;
-  // purify relevant input
-  const purifiedUsername = purify(username);
-  const purifiedEmail = purify(email);
-  // Hash the password
-  const hashedPassword = await hashPassword(password);
-
-  // check if username exists
-  const userExists = await findUserByUsername(username);
-
-  if (userExists) {
-    res.status(401).send({ error: "Username is taken" });
-  } else {
-    // Create user in mongodb
-    createUser(purifiedUsername, purifiedEmail, hashedPassword);
-
-    // Send mail confirming registration
-    const mailMessage = registerMailMessage(username);
-    sendEmail(email, registerMailSubject, mailMessage);
-
-    res.status(201).send({ message: "Registration successful. Redirecting to login." });
+  try {
+    const { username, email, password } = req.body;
+    // purify relevant input
+    const purifiedUsername = purify(username);
+    const purifiedEmail = purify(email);
+    // Hash the password
+    const hashedPassword = await hashPassword(password);
+  
+    // check if username exists
+    const userExists = await findUserByUsername(username);
+  
+    if (userExists) {
+      res.status(401).send({ message: "Username is taken" });
+    } else {
+      // Create user in mongodb
+      const result = await createUser(
+        purifiedUsername,
+        purifiedEmail,
+        hashedPassword
+      );
+      console.log(result)
+      if (result.acknowledged) {
+        // Send mail confirming registration
+        const mailMessage = registerMailMessage(username);
+        sendEmail(email, registerMailSubject, mailMessage);
+  
+        res
+          .status(201)
+          .send({ message: "Registration successful. Redirecting to login." });
+      } else {
+        res.status(404).send({ message: "Could not create user" });
+      }
+    }
+  } catch (error) {
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
@@ -112,11 +127,11 @@ router.post("/api/auth/getSecretToken", async (req, res) => {
         .status(200)
         .send({ message: "Password reset token sent successfully." });
     } else {
-      res.status(404).send({ error: "User not found." });
+      res.status(404).send({ message: "User not found." });
     }
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({ error: "Internal server error." });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 
@@ -139,8 +154,8 @@ router.post("/api/auth/resetPassword", async (req, res) => {
       res.status(401).send({ error: "Invalid token or username." });
     }
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({ error: "Internal server error." });
+    const errorMessage = "Internal server error: " + error;
+    res.status(500).send({ message: errorMessage });
   }
 });
 

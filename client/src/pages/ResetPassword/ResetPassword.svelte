@@ -22,16 +22,13 @@
       });
       if (response.ok) {
         // Handle successful token mail
-        const resetMessage = await response.json();
-        showToast(resetMessage.message, "succes");
+        const result = await response.json();
+        showToast(result.message, "success");
         userNameForReset = "";
       } else {
-        // Handle failed token mail
-        const errorData = await response.json();
-        // make the below a toast instead
-        const errorMessage =
-          errorData.error || "Reset failed. Please check your username.";
-        showToast(errorMessage, "error");
+     
+        const error = await response.json();
+        showToast(error.message, "error");
 
         userNameForReset = "";
       }
@@ -60,21 +57,15 @@
       });
 
       if (response.ok) {
-        // Handle successful reset
-        const resetSuccessData = await response.json();
-        showToast(resetSuccessData.message, "succes");
+        const result = await response.json();
+        showToast(result.message, "succes");
 
         setTimeout(() => {
           navigate("/login");
         }, 3000);
       } else {
-        // Handle failed reset
-        const errorData = await response.json();
-        // make the below a toast instead
-        const errorMessage =
-          errorData.error ||
-          "Reset failed. Please check your username and token.";
-        showToast(errorMessage, "error");
+        const error = await response.json();
+        showToast(error.message, "error");
 
         username = "";
         secretToken = "";
