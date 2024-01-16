@@ -9,16 +9,8 @@ export const initializeSocket = (IO_URL, projectId) => {
         projectId: projectId,
       },
     });
-    // Return a promise that resolves when the socket is connected
-    return new Promise((resolve) => {
-      socket.on("connect", () => {
-        resolve(socket);
-      });
-    });
+    return socket;
   }
-
-  // If the socket is already initialized then return a resolved promise
-  return Promise.resolve(socket);
 };
 
 export const disconnectSocket = () => {

@@ -1,0 +1,15 @@
+ul, ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Style for non-hoverable li elements */
+  li {
+    display: block;
+    margin-bottom: 8px; /* Adjust the spacing between li elements if needed */
+  }
+  li:hover {
+    color: black;
+    background-color: white; /* Change the background color on hover */
+  }
