@@ -71,7 +71,7 @@
     </svg>
   </div>
 {:else}
-  <p>No tasks assigned to project yet.</p>
+  <p></p>
 {/if}
 
 <!-- style set here for rect to override the background color of diagram -->

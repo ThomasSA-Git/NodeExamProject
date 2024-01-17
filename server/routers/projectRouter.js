@@ -78,21 +78,36 @@ router.delete("/api/projects/:projectId", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const foundProject = await getProjectByProjectId(projectId);
-    const users = foundProject.users;
-    await deleteProject(projectId);
+
     if (!foundProject) {
       res.status(404).send({ message: "Project not found" });
       return;
     }
-    await Promise.all(
-      users.map((user) => removeProjectIdFromUser(user, projectId))
-    );
-    res
-      .status(200)
-      .send({ message: `Project deleted successfully. Redirecting` });
+
+    const users = foundProject.users;
+
+    for (let user of users) {
+      let result = await removeProjectIdFromUser(user, projectId);
+
+      if (result.modifiedCount !== 1) {
+        res
+          .status(404)
+          .send({ message: `Project not deleted. Could not delete ${user}` });
+        return;
+      }
+    }
+
+    const deleteResult = await deleteProject(projectId);
+    if (deleteResult.deletedCount === 1) {
+      res
+        .status(200)
+        .send({ message: "Project deleted successfully. Redirecting" });
+    } else {
+      res.status(404).send({ message: "Project not deleted" });
+    }
   } catch (error) {
-    const errorMessage = "Internal server error: " + error;
-    res.status(500).send({ message: errorMessage });
+    console.error("Error occurred:", error);
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 

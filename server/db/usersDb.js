@@ -1,4 +1,5 @@
 import db from "./connection.js";
+import { ObjectId } from "mongodb";
 
 export const createUser = async (username, email, password) => {
   try {
@@ -33,9 +34,10 @@ export const addProjectIdToUser = async (username, projectId) => {
 
 export const removeProjectIdFromUser = async (username, projectId) => {
   try {
+    const _id = new ObjectId(projectId);
     const result = await db.users.updateOne(
       { username: username },
-      { $pull: { projects: projectId } }
+      { $pull: { projects: _id } }
     );
     return result;
   } catch (err) {
@@ -71,12 +73,6 @@ export const updateUserPassword = async (username, newPassword) => {
       { username },
       { $set: { password: newPassword } }
     );
-
-    if (result.modifiedCount === 1) {
-      console.log("Password updated successfully");
-    } else {
-      console.log("User not found or password not updated");
-    }
 
     return result;
   } catch (err) {

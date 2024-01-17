@@ -5,6 +5,7 @@
   import { user } from "../../store/stores.js";
   import { currentProjectId, currentNoteName } from "../../store/project.js";
   import { showToast } from "../../assets/js/toast.js";
+  import { purify } from "../../assets/js/purification.js";
   import { navigate } from "svelte-navigator";
   import { getSocket } from "../../util/socketService";
   import "../../assets/css/toast.css";
@@ -103,7 +104,7 @@
       const noteData = {
         projectId: $currentProjectId,
         note: {
-          noteName: newNoteName,
+          noteName: purify(newNoteName),
           lastEditedBy: $user,
           note: newNote,
         },
@@ -120,29 +121,16 @@
 
       if (response.ok) {
         const result = await response.json();
-        if (result.created) {
-          $currentNoteName = newNoteName;
-          newNoteName = "";
-
-          navigate("/notes");
-        } else {
-          showToast(result.message, "error");
-        }
+        $currentNoteName = purify(newNoteName);
+        newNoteName = "";
+        navigate("/notes");
       } else {
-        console.error("Failed to save data:", response.statusText);
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
-      console.error("Error during save:", error);
+      showToast(`Error during save: ${error}`, "error");
     }
-  }
-
-  // transforms dates into readable data
-  function handleDate(date) {
-    /*    return new Date(date).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }); */
   }
 
   // sets being edited to true if the value is not null, undefined or 0

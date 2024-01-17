@@ -6,6 +6,7 @@
   import "../../assets/css/toast.css";
   import "../../assets/css/userPage.css";
   import { showToast } from "../../assets/js/toast.js";
+  import { purify } from "../../assets/js/purification.js";
   import { navigate } from "svelte-navigator";
   import { paginate, LightPaginationNav } from "svelte-paginate";
   import { disconnectSocket } from "../../util/socketService.js";
@@ -43,7 +44,7 @@
     event.preventDefault();
     try {
       const newProjectData = {
-        projectName: newProjectName,
+        projectName: purify(newProjectName),
         username: $user,
       };
 
@@ -59,18 +60,17 @@
       if (response.ok) {
         const result = await response.json();
         newProjectName = "";
-        $currentProjectName = newProjectName;
+        $currentProjectName = purify(newProjectName);
         showToast(result.message, "success");
         setTimeout(() => {
           loadProjects();
         }, 2000);
       } else {
-        const errorData = await response.json();
-        const errorMessage = errorData.error || "Failed to create project.";
-        showToast(errorMessage, "error");
+        const error = await response.json();
+        showToast(error.message, "error");
       }
     } catch (error) {
-      showToast("An error occurred. Could not create project", "error");
+      showToast(`An error occurred. Could not create project: ${error}`, "error");
     }
   }
 

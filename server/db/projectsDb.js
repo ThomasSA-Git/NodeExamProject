@@ -72,7 +72,8 @@ export const deleteUserFromProject = async (projectId, username) => {
 export const deleteProject = async (projectId) => {
   try {
     const _id = new ObjectId(projectId);
-    await db.projects.deleteOne({ _id });
+    const result = await db.projects.deleteOne({ _id });
+    return result;
   } catch (err) {
     console.error("Error occured while deleting project");
     throw err;

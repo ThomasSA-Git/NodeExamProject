@@ -158,5 +158,7 @@
   <button on:click={handleUpdate}>Save changes</button>
   <button class="navigate-button" on:click={handleNavigate}>Back</button>
   <button class="delete-btn" on:click={handleDeleteNote}>Delete</button>
+  <div class="editor-div">
   <div id="editorjs"></div>
+</div>
 </div>

@@ -2,5 +2,8 @@
   "name": "projectmanager",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["server", "client"]
+  "workspaces": ["server", "client"],
+  "scripts": {
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\""
+}
 }

@@ -78,8 +78,8 @@ router.post("/api/auth/register", async (req, res) => {
         purifiedEmail,
         hashedPassword
       );
-      console.log(result)
-      if (result.acknowledged) {
+      
+      if (result.insertedId) {
         // Send mail confirming registration
         const mailMessage = registerMailMessage(username);
         sendEmail(email, registerMailSubject, mailMessage);
@@ -146,12 +146,16 @@ router.post("/api/auth/resetPassword", async (req, res) => {
       // hash new password, update it and delete the token used for it
       const hashedNewPassword = await hashPassword(newPassword);
       //update password for user
-      await updateUserPassword(username, hashedNewPassword);
+      const result = await updateUserPassword(username, hashedNewPassword);
+      if(result.modifiedCount === 1){
       // deletes token used for update of password
       await deleteUserTokenByUsername(username);
       res.status(200).send({ message: "Password reset successful." });
     } else {
-      res.status(401).send({ error: "Invalid token or username." });
+      res.status(401).send({ error: "Could not update password" });
+    }
+    } else {
+      res.status(404).send({ error: "Invalid token or username." });
     }
   } catch (error) {
     const errorMessage = "Internal server error: " + error;
