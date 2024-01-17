@@ -7,6 +7,7 @@ export function purify(input) {
     .replace(/'/g, "&#39;");
 }
 
+
 export function purifyData(data) {
   switch (data.type) {
     case "header":

@@ -22,7 +22,7 @@ import {
   removeProjectIdFromUser,
 } from "../db/usersDb.js";
 
-import { purifyKanbanList } from "../util/DOMpurify.js";
+import { purifyKanbanList, purifyDiagram } from "../util/DOMpurify.js";
 
 export default (io) => {
   io.on("connection", (socket) => {
@@ -101,7 +101,7 @@ export default (io) => {
     });
     socket.on("update-diagram", async (data) => {
       try {
-        const diagram = data.diagram;
+        const diagram = purifyDiagram(data.diagram);
         const projectId = data.projectId;
         const result = await updateDiagram(projectId, diagram);
         if (result.acknowledged && result.matchedCount) {
@@ -121,7 +121,7 @@ export default (io) => {
     });
     socket.on("save-diagram", async (data) => {
       try {
-        const diagram = data.diagram;
+        const diagram = purifyDiagram(data.diagram);
         const projectId = data.projectId;
         const result = await updateDiagram(projectId, diagram);
         if (result.acknowledged && result.matchedCount) {

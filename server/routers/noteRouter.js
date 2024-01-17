@@ -12,6 +12,8 @@ import {
 
 import { notesResponse } from "../dto/notesResponse.js";
 
+import { purifyNote } from "../util/DOMpurify.js";
+
 import { isAuthenticated } from "../middleware/authMiddleWare.js";
 
 router.get("/api/notes", isAuthenticated, async (req, res) => {
@@ -51,15 +53,16 @@ router.get("/api/notes/:noteName", isAuthenticated, async (req, res) => {
 
 router.post("/api/notes", isAuthenticated, async (req, res) => {
   try {
-    const { projectId, note } = req.body;
+    const { note } = req.body;
+    const projectId = req.session.projectId;
     const result = await getNoteByNoteName(
-      req.session.projectId,
+      projectId,
       note.noteName
     );
     if (result.length == 0) {
       const result = await createNote(projectId, note);
       if (result.modifiedCount === 1) {
-        res.status(201).send({ message: "Note created", created: true });
+        res.status(201).send({ message: "Note created" });
       } else {
         res.status(404).send({ message: "Could not create note" });
       }
@@ -81,8 +84,9 @@ router.patch("/api/notes/:noteName", isAuthenticated, async (req, res) => {
     const result = await updateNoteByNoteName(
       req.session.projectId,
       req.params.noteName,
-      updatedNote
+      purifyNote(updatedNote)
     );
+ 
     if (result.modifiedCount === 1) {
       res.status(200).send({ message: "Note updates saved" });
     } else {

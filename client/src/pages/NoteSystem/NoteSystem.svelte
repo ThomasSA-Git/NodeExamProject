@@ -81,13 +81,15 @@
       const savedNoteData = await editor.save();
 
       // this sanitazion works fine but when put into the editor again upon load the text will be displayed as typed.
+
       if (savedNoteData.note && savedNoteData.note.blocks) {
-        for (const block of savedNoteData.note.blocks) {
-          if (block.data) {
-            block.data = purifyData(block.data);
-          }
-        }
-      }
+        savedNoteData.note.blocks = savedNoteData.note.blocks.map((block) => {
+            if (block.data) {
+                block.data = purifyData(block.data);
+            }
+            return block;
+        });
+    }
 
       const updatedNote = {
         noteName: $currentNoteName,
