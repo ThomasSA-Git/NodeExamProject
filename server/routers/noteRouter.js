@@ -18,7 +18,7 @@ router.get("/api/notes", isAuthenticated, async (req, res) => {
   try {
     const projectId = req.session.projectId;
     let notes = await getNotesByProjectId(projectId);
-    if (notes.length != 0) {
+    if (notes) {
       notes = notesResponse(notes);
       res.status(200).send({ notes });
     } else {

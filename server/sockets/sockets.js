@@ -25,9 +25,9 @@ import {
 import { purifyKanbanList } from "../util/DOMpurify.js";
 
 export default (io) => {
-  io.on("connection", async (socket) => {
+  io.on("connection", (socket) => {
     // join project room with projectId upon connection
-    const projectId = await socket.handshake.query.projectId;
+    const projectId = socket.handshake.query.projectId;
     socket.join(projectId);
 
     /*                                       KANBAN SOCKETS                       */

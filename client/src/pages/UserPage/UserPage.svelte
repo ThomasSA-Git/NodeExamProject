@@ -70,7 +70,10 @@
         showToast(error.message, "error");
       }
     } catch (error) {
-      showToast(`An error occurred. Could not create project: ${error}`, "error");
+      showToast(
+        `An error occurred. Could not create project: ${error}`,
+        "error"
+      );
     }
   }
 
@@ -95,6 +98,10 @@
     items = [...items].sort((a, b) => {
       const aValue = column === "projectName" ? a.projectName : a.createdAt;
       const bValue = column === "projectName" ? b.projectName : b.createdAt;
+      // Add a check for undefined values
+      if (aValue === undefined || bValue === undefined) {
+        return 0; // Handle undefined values by treating them as equal
+      }
 
       if (sortDirection === "asc") {
         return aValue.localeCompare(bValue);

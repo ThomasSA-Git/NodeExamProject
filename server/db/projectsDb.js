@@ -3,7 +3,14 @@ import db from "./connection.js";
 
 export const getProjectsByUsername = async (username) => {
   try {
-    const result = await db.projects.find({ users: username }).toArray();
+    // 1 for inclusion, 0 for exclusion
+    const projection = {
+      _id: 1,
+      projectName: 1,
+      createdAt: 1
+    };
+
+    const result = await db.projects.find({ users: username }).project(projection).toArray();
     return result.reverse();
   } catch (err) {
     console.error("Error occurred while finding projects by user", err);

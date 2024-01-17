@@ -37,11 +37,9 @@
         }, 2000);
       } else {
         // Handle failed login
-        const errorData = await response.json();
+        const error = await response.json();
         // make the below a toast instead
-        const errorMessage =
-          errorData.error || "Login failed. Please check your credentials.";
-        showToast(errorMessage, "error");
+        showToast(error.message, "error");
         username = "";
         password = "";
       }
@@ -64,7 +62,13 @@
   <input type="text" id="username" bind:value={username} required />
 
   <label for="password">Password:</label>
-  <input type="password" id="password" bind:value={password} required />
+  <input
+    type="password"
+    id="password"
+    bind:value={password}
+    required
+    autocomplete=""
+  />
 
   <button type="submit">Login</button>
 </form>

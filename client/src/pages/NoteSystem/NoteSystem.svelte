@@ -11,6 +11,7 @@
   import { user } from "../../store/stores.js";
   import { currentNoteName, currentProjectId } from "../../store/project.js";
   import { showToast } from "../../assets/js/toast.js";
+  import { purifyData } from "../../assets/js/purification.js";
   import "../../assets/css/toast.css";
   import "../../assets/css/noteSystem.css";
   import { navigate } from "svelte-navigator";
@@ -79,7 +80,15 @@
     try {
       const savedNoteData = await editor.save();
 
-      // Prepare the updated note object without wrapping it in an array
+      // this sanitazion works fine but when put into the editor again upon load the text will be displayed as typed.
+      if (savedNoteData.note && savedNoteData.note.blocks) {
+        for (const block of savedNoteData.note.blocks) {
+          if (block.data) {
+            block.data = purifyData(block.data);
+          }
+        }
+      }
+
       const updatedNote = {
         noteName: $currentNoteName,
         lastEditedBy: $user,
@@ -159,6 +168,6 @@
   <button class="navigate-button" on:click={handleNavigate}>Back</button>
   <button class="delete-btn" on:click={handleDeleteNote}>Delete</button>
   <div class="editor-div">
-  <div id="editorjs"></div>
-</div>
+    <div id="editorjs"></div>
+  </div>
 </div>

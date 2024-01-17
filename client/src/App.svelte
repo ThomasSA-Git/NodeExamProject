@@ -14,8 +14,7 @@
   import { BASE_URL } from "./store/global.js";
   import Diagram from "./pages/Diagram/Diagram.svelte";
   import NoteOverview from "./pages/NoteOverview/NoteOverview.svelte";
-  import { getSocket, disconnectSocket } from "./util/socketService.js";
-
+  import { disconnectSocket } from "./util/socketService.js";
   import { onMount } from "svelte";
   import { showToast } from "./assets/js/toast";
 
@@ -45,12 +44,12 @@
         showToast("Not logged out", "error");
       }
     } catch (error) {
-      console.error("Error during logout:", error);
+      showToast(`Error during logout: ${error}`, "error");
     }
   }
 </script>
 
-<Router>
+<Router primary={false}>
   <nav>
     <Link to="/">Home</Link>
     {#if $user != null}

@@ -63,7 +63,7 @@
   <input type="email" id="email" bind:value={email} required />
 
   <label for="password">Password:</label>
-  <input type="password" id="password" bind:value={password} required />
+  <input type="password" id="password" bind:value={password} required autocomplete=""/>
 
   <button type="submit">Register</button>
 </form>

@@ -5,11 +5,9 @@ export const getNotesByProjectId = async (projectId) => {
   try {
     const _id = new ObjectId(projectId);
     const result = await db.projects.findOne({ _id }, { notes: 1 });
-
     return result ? result.notes.reverse() : [];
   } catch (err) {
     console.error("Error occurred while finding project", err);
-    // Handle the error gracefully, you can choose to return a specific value or rethrow the error
     throw new Error("Failed to find notes by project ID");
   }
 };

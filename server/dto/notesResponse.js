@@ -4,7 +4,7 @@ export function notesResponse(notes) {
 }
 
 function transformNote(note) {
-  const transformedNote = { ...note }; // Create a shallow copy of the note object
+  const transformedNote = { ...note };
 
   if (note.note && note.note.time) {
     transformedNote.note = {

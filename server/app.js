@@ -46,8 +46,10 @@ const sessionMiddleware = session({
 
 app.use(sessionMiddleware);
 
+// middleware to parse incoming JSON requests
 app.use(express.json());
 
+// middleware to handle ratelimiting
 import rateLimit from "express-rate-limit";
 
 const allRoutesRateLimiter = rateLimit({

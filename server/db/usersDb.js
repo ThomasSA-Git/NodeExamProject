@@ -1,5 +1,4 @@
 import db from "./connection.js";
-import { ObjectId } from "mongodb";
 
 export const createUser = async (username, email, password) => {
   try {
@@ -20,7 +19,6 @@ export const createUser = async (username, email, password) => {
 
 export const addProjectIdToUser = async (username, projectId) => {
   try {
-
     const result = await db.users.updateOne(
       { username: username },
       { $addToSet: { projects: projectId } }
@@ -34,10 +32,10 @@ export const addProjectIdToUser = async (username, projectId) => {
 
 export const removeProjectIdFromUser = async (username, projectId) => {
   try {
-    const _id = new ObjectId(projectId);
+    
     const result = await db.users.updateOne(
       { username: username },
-      { $pull: { projects: _id } }
+      { $pull: { projects: projectId } }
     );
     return result;
   } catch (err) {

@@ -25,18 +25,24 @@
   let sortDirection = "asc";
 
   function sortBy(column) {
+    // ff the same column is clicked again change the sort direction
     if (sortColumn === column) {
       sortDirection = sortDirection === "asc" ? "desc" : "asc";
     } else {
+      // if a new column is clicked then reset the sort column and set direction to "asc"
       sortColumn = column;
       sortDirection = "asc";
     }
-
-    // Sort the items array
+    // sort the items array based on the selected column and direction
     items = [...items].sort((a, b) => {
-      const aValue = column === "projectName" ? a.projectName : a.createdAt;
-      const bValue = column === "projectName" ? b.projectName : b.createdAt;
-
+      // determine values to compare based on the selected column
+      const aValue = a[column] === "time" ? a.note.time : a[column];
+      const bValue = b[column] === "time" ? b.note.time : b[column];
+      // add a check for undefined values
+      if (aValue === undefined || bValue === undefined) {
+        return 0; // Handle undefined values by treating them as equal
+      }
+      // compare values based on sort direction
       if (sortDirection === "asc") {
         return aValue.localeCompare(bValue);
       } else {
@@ -157,8 +163,8 @@
     <thead>
       <tr>
         <th on:click={() => sortBy("noteName")}>Note Name</th>
-        <th on:click={() => sortBy("createdAt")}>Created at</th>
-        <th>Last edited by</th>
+        <th on:click={() => sortBy("time")}>Created at</th>
+        <th on:click={() => sortBy("lastEditedBy")}>Last edited by</th>
         <th>Being edited</th>
       </tr>
     </thead>
