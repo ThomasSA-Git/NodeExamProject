@@ -16,13 +16,12 @@ ul {
   height: 40px; /* needed when empty */
 }
 .kan-col {
-
   flex: 1;
   border: 3px solid darkgray;
   border-radius: 5px;
   padding: 10px;
   min-height: 500px;
-  min-width: 230px;
+  min-width: 220px;
   background-color: white(201, 205, 201);
 }
 .kan-container {
@@ -30,7 +29,7 @@ ul {
   margin-right: 30px;
 }
 .list-name {
-  flex: 9; /* Take up 90% of the space */
+  flex: 6; /* Take up 90% of the space */
 }
 
 .btn-container {

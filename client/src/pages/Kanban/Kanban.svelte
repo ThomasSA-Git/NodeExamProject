@@ -145,7 +145,8 @@
   // Modal logic for add task
   let isModalOpen = false;
 
-  function openModal() {
+  function openModal(listIndex) {
+    selectedListIndex = listIndex;
     isModalOpen = true;
   }
 
@@ -153,10 +154,16 @@
     isModalOpen = false;
   }
 
+  let selectedListIndex = 0;
+
   function addTask(newTask) {
-    // adds the new task to the lists array
-    kanban[0].tasks = [newTask, ...kanban[0].tasks];
+    // adds the new task to the selected list index
+    kanban[selectedListIndex].tasks = [
+      newTask,
+      ...kanban[selectedListIndex].tasks,
+    ];
     handleUpdateKanban();
+    isModalOpen = false;
   }
 
   // modal logic for update task
@@ -213,14 +220,14 @@
 <div class="btn-container">
   <h3 style="margin-right: 300px;">Kanban board for {$currentProjectName}</h3>
   <button class="btn-container-btn" on:click={handleAddList}>Add list</button>
-  <button class="btn-container-btn" on:click={openModal}>Add Task</button>
+<!--   <button class="btn-container-btn" on:click={openModal}>Add Task</button> -->
   <button class="navigate-button" on:click={() => handleNavigate("/project")}
     >Dashboard</button
   >
 </div>
 
 {#if isModalOpen}
-  <TaskModal on:closeModal={closeModal} {addTask} />
+  <TaskModal on:closeModal={closeModal} {addTask} {selectedListIndex} />
 {/if}
 
 {#if isUpdateModalOpen}
@@ -235,12 +242,15 @@
     {#each kanban as list, listIndex (list)}
       <div class="kan-col">
         <input
-          style="font: bold 16px Arial, sans-serif; max-width: 180px"
+          style="font: bold 16px Arial, sans-serif; max-width: 115px;"
           bind:value={list.name}
           placeholder={list.name}
           on:change={handleEditListName(listIndex, list.name)}
         />
-
+        <!-- add by list -->
+        <button class="btn-container-btn" on:click={() => openModal(listIndex)}
+          >+task</button
+        >
         <button class="delete-button" on:click={() => deleteList(listIndex)}>
           <img
             src="../../delete-icon.jpg"

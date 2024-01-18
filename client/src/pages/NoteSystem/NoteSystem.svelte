@@ -24,6 +24,7 @@
   let noteData;
   let lastEditedBy;
   let socket;
+  let autoSave = true;
 
   function initializeEditor() {
     editor = new EditorJS({
@@ -84,12 +85,12 @@
 
       if (savedNoteData.note && savedNoteData.note.blocks) {
         savedNoteData.note.blocks = savedNoteData.note.blocks.map((block) => {
-            if (block.data) {
-                block.data = purifyData(block.data);
-            }
-            return block;
+          if (block.data) {
+            block.data = purifyData(block.data);
+          }
+          return block;
         });
-    }
+      }
 
       const updatedNote = {
         noteName: $currentNoteName,
@@ -124,6 +125,7 @@
       });
       if (response.ok) {
         const result = await response.json();
+        autoSave = false;
         showToast(result.message, "success");
         navigate("/noteOverview");
       } else {
@@ -159,7 +161,9 @@
   }
 
   onDestroy(() => {
-    handleUpdate();
+    if (autoSave) {
+      handleUpdate();
+    }
   });
 </script>
 
