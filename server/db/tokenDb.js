@@ -1,13 +1,10 @@
 import db from "./connection.js";
 
-const dbName = "Exam";
-const collectionName = "resetPassword"
-
 export const findUserInResetPassword = async (username) => {
     try {
 
-  
       const result = await db.tokens.findOne({ username });
+      
       return result;
     } catch (err) {
       console.error("Error occurred while finding user in resetPassword", err);
@@ -31,7 +28,6 @@ export const findUserInResetPassword = async (username) => {
       const result = await db.tokens.insertOne(resetPasswordEntry, {
         expireAfterSeconds: 1800,
       });
-      console.log("Reset password entry added successfully");
       return result;
     } catch (err) {
       console.error("Error occurred while adding to resetPassword", err);
@@ -43,12 +39,6 @@ export const findUserInResetPassword = async (username) => {
   export const deleteUserTokenByUsername = async (username) => {
     try {
       const result = await db.tokens.deleteOne({ username });
-  
-      if (result.deletedCount === 1) {
-        console.log("User token deleted successfully");
-      } else {
-        console.log("User token not found or deletion unsuccessful");
-      }
   
       return result;
     } catch (err) {

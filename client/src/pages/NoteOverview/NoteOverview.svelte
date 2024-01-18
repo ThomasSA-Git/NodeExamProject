@@ -36,17 +36,21 @@
     // sort the items array based on the selected column and direction
     items = [...items].sort((a, b) => {
       // determine values to compare based on the selected column
-      const aValue = a[column] === "time" ? a.note.time : a[column];
-      const bValue = b[column] === "time" ? b.note.time : b[column];
+      const aValue = a[column];
+      const bValue = b[column];
       // add a check for undefined values
       if (aValue === undefined || bValue === undefined) {
         return 0; // Handle undefined values by treating them as equal
       }
       // compare values based on sort direction
-      if (sortDirection === "asc") {
-        return aValue.localeCompare(bValue);
+      if (column === "time") {
+        // Sort by date without using localeCompare
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
       } else {
-        return bValue.localeCompare(aValue);
+        // localeCompare used for string comparison
+        return sortDirection === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
     });
   }
@@ -141,9 +145,16 @@
 
   // sets being edited to true if the value is not null, undefined or 0
   function isBeingEdited(editorCounter) {
-    return (
-      editorCounter !== null && editorCounter !== undefined && editorCounter > 0
-    );
+    if (
+      editorCounter !== null &&
+      editorCounter !== undefined &&
+      editorCounter > 0
+    ) {
+      editorCounter = true;
+    } else {
+      editorCounter = false;
+    }
+    return editorCounter;
   }
 
   function handleNavigate(noteName) {

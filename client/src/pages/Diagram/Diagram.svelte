@@ -100,10 +100,10 @@
   }
 
   // subscribing to changes in both nodes and edges so that if, update or save is initiated
-  // the initialEdges and initialNodes are updated with positions 
-  const unsubscribeNodes = nodes.subscribe(updatedNodes => {
-  initialNodes = updatedNodes;
-});
+  // the initialNodes are updated with positions
+  const unsubscribeNodes = nodes.subscribe((updatedNodes) => {
+    initialNodes = updatedNodes;
+  });
 
   const unsubscribeEdges = edges.subscribe((updatedEdges) => {
     initialEdges = updatedEdges;
@@ -148,7 +148,7 @@
     );
     edges.set(initialEdges);
 
-     // updates diagram and emit change to other clients in same room.
+    // updates diagram and emit change to other clients in same room.
     updateDiagram();
   }
 

@@ -5,7 +5,7 @@ export const getKanbanByProjectId = async (projectId) => {
   try {
     const projectObjectId = new ObjectId(projectId);
 
-    // Find the Kanban board directly by projectId and getting kanban only projection
+    // find the Kanban board directly by projectId and getting kanban only projection
     const { kanban } = await db.projects.findOne(
       { _id: projectObjectId },
       { projection: { _id: 0, kanban: 1 } }

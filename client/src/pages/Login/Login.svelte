@@ -25,20 +25,16 @@
       });
 
       if (response.ok) {
-        // Handle successful login
         const userData = await response.json();
         $user = userData.username;
         localStorage.setItem("user", JSON.stringify(userData));
         showToast("Login successful. Redirecting to user page.", "success");
-
-        // Redirect
+        // redirect
         setTimeout(() => {
           navigate("/userpage");
         }, 2000);
       } else {
-        // Handle failed login
         const error = await response.json();
-        // make the below a toast instead
         showToast(error.message, "error");
         username = "";
         password = "";

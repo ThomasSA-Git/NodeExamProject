@@ -13,11 +13,17 @@
   const { updateNodeData } = useSvelteFlow();
 
   function handleInputLabel(event) {
-    updateNodeData(id, { label: purify(event.target.value), text: purify(data.text) });
+    updateNodeData(id, {
+      label: purify(event.target.value),
+      text: purify(data.text),
+    });
   }
 
   function handleInputText(event) {
-    updateNodeData(id, { label: purify(data.label), text: purify(event.target.value) });
+    updateNodeData(id, {
+      label: purify(data.label),
+      text: purify(event.target.value),
+    });
   }
 </script>
 

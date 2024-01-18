@@ -94,20 +94,22 @@
       sortDirection = "asc";
     }
 
-    // Sorts the array with projects (called items because of paginate lite)
+    // sorts tshe array with projects (called items because of paginate lite)
+    // use spread operator to make shallow copy to sort before setting items
     items = [...items].sort((a, b) => {
-      const aValue = column === "projectName" ? a.projectName : a.createdAt;
-      const bValue = column === "projectName" ? b.projectName : b.createdAt;
-      // Add a check for undefined values
-      if (aValue === undefined || bValue === undefined) {
-        return 0; // Handle undefined values by treating them as equal
-      }
+      const aValue = a[column];
+      const bValue = b[column];
 
-      if (sortDirection === "asc") {
-        return aValue.localeCompare(bValue);
-      } else {
-        return bValue.localeCompare(aValue);
+      if (aValue === undefined || bValue === undefined) {
+        return 0; // handle undefined values by treating them as equal
       }
+      if (column === "createdAt") {
+      // sort by date without using localeCompare
+      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    } else {
+      // localeCompare used for string comparison
+      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    }
     });
   }
 </script>
@@ -140,7 +142,6 @@
           on:click={() => handleNavigate(item.projectName, item._id)}
         >
           <td>{item.projectName}</td>
-          <!-- Add more columns as needed -->
           <td style="max-width: 100px;">{item.createdAt}</td>
         </tr>
       {/each}
